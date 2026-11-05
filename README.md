@@ -1,119 +1,116 @@
-# ⚡ Database Query Performance Analyzer & Optimization System
+# Database Query Performance Analyzer and Optimization System
 
-<div align="center">
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Framework](https://img.shields.io/badge/framework-Flask%203.x-lightgrey.svg)](https://flask.palletsprojects.com/)
+[![Database](https://img.shields.io/badge/database-MySQL%208.0%2B%20(InnoDB)-orange.svg)](https://www.mysql.com/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white)
-![Flask](https://img.shields.io/badge/Flask-3.x-black?style=for-the-badge&logo=flask&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-8.0%2B_InnoDB-orange?style=for-the-badge&logo=mysql&logoColor=white)
-![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-![Chart.js](https://img.shields.io/badge/Chart.js-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-
-<p align="center">
-  <strong>An enterprise-grade SQL benchmarking laboratory, execution plan visualizer, and relational database performance analyzer.</strong>
-</p>
-
-<p align="center">
-  <a href="#-key-features">Key Features</a> •
-  <a href="#-system-architecture">System Architecture</a> •
-  <a href="#-database-schema--normalization-3nf">Database Design</a> •
-  <a href="#-quick-start">Quick Start</a> •
-  <a href="#-api-documentation">API Reference</a> •
-  <a href="#-performance-benchmark-results">Benchmark Lab</a> •
-  <a href="#-viva-voce--interview-guide">Viva Guide</a>
-</p>
-
-</div>
+An automated SQL benchmarking platform, query execution plan analyzer, and relational optimization testbed. The system evaluates MySQL query performance across large datasets (100,000+ records), inspects cost-based query optimizer plans, measures microsecond-accurate query latency, and validates index selectivity under controlled workloads.
 
 ---
 
-## 📌 Executive Summary
+## Table of Contents
 
-Modern high-concurrency systems rely on sub-millisecond database response times. While developers frequently write syntactically correct SQL queries, poorly indexed tables and unoptimized query plans cause severe I/O bottlenecks, table locks, and memory thrashing when datasets scale to hundreds of thousands of records.
-
-The **Database Query Performance Analyzer and Optimization System** provides a controlled, sandboxed environment for inspecting MySQL query execution plans (`EXPLAIN` and `EXPLAIN ANALYZE`), measuring real-time query latency with monotonic timing precision (`time.perf_counter`), analyzing B-Tree index selectivity, and evaluating database-side triggers and stored procedures.
-
-> **Academic Affiliation**: Developed for the **Department of Computer Science & Engineering, Sahyadri College of Engineering & Management, Mangaluru** (Academic Year: 2026–2027).
-
----
-
-## 🚀 Key Features
-
-* **⚡ High-Precision Monotonic Benchmarking**: Calculates query latency down to microsecond resolution ($\text{ms} \pm 0.001$) using Python's hardware monotonic clock (`time.perf_counter()`), eliminating wall-clock jitter.
-* **🔍 Execution Plan Decomposition**: Interrogates the MySQL Optimizer to expose access types (`ALL` Full Table Scan vs `ref` / `range` / `eq_ref` B-Tree lookups), examined row counts, filtered percentages, and disk temporary tables.
-* **🌳 Dynamic B-Tree Index Lab**: Toggle single-column and composite indexes on a **100,000-row dataset** on-the-fly and observe immediate **90%+ query latency reductions**.
-* **🛡️ Security-First Query Catalog**: Strict parameterized catalogue prevents SQL injection and forbids arbitrary destructive DDL/DML execution.
-* **🤖 Automated Event Auditing (Database Trigger)**: Database-level trigger `trg_benchmark_result_audit` automatically registers immutable audit logs upon every benchmark insertion.
-* **📦 Encapsulated Business Logic (Stored Procedure)**: Multi-table 3NF joins encapsulated in stored procedure `GetBenchmarkHistory(p_query_id)`.
-* **📊 Reporting Views**: Materializes join complexity through the `BenchmarkSummary` database view.
-* **🔄 Zero-Config Dual-Engine Fallback**: Seamlessly connects to MySQL 8.0+ when available, with an automatic embedded engine fallback so presentations never fail due to local service outages.
+- [Overview](#overview)
+- [System Architecture](#system-architecture)
+- [Database Design and Normalization](#database-design-and-normalization)
+- [Database Programmability](#database-programmability)
+  - [Trigger Specification](#trigger-specification)
+  - [Stored Procedure Specification](#stored-procedure-specification)
+  - [Analytical View](#analytical-view)
+- [Performance Evaluation](#performance-evaluation)
+- [Installation and Setup](#installation-and-setup)
+- [API Reference](#api-reference)
+- [Technical Reference and Viva Guide](#technical-reference-and-viva-guide)
+- [Project Directory Structure](#project-directory-structure)
+- [License](#license)
 
 ---
 
-## 🏛️ System Architecture
+## Overview
 
-The application adheres to a clean **Three-Tier Decoupled Architecture**:
+In relational database systems, query latency and resource utilization are governed by access paths, join algorithms, and available indexes. Unindexed queries on large tables force the storage engine to perform Full Table Scans (`type: ALL`), loading every data page into the buffer pool and causing high disk I/O and CPU contention.
+
+The **Database Query Performance Analyzer and Optimization System** provides an interface to:
+1. Benchmark approved SQL statements using hardware-level monotonic clocks (`time.perf_counter`).
+2. Interrogate the MySQL Optimizer using `EXPLAIN` and `EXPLAIN ANALYZE` iterator trees.
+3. Quantify performance variations between baseline table scans and B-Tree index lookups (`type: ref`).
+4. Audit execution events automatically using database triggers.
+5. Encapsulate multi-relation joins using stored procedures and views.
+
+The project is developed for the **Department of Computer Science and Engineering, Sahyadri College of Engineering & Management, Mangaluru** for the academic year 2026–2027.
+
+---
+
+## System Architecture
+
+The application is structured into three tiers:
 
 ```mermaid
 flowchart TD
-    subgraph Client ["Client Presentation Tier (Browser)"]
-        UI["Tailwind CSS + HTML5 Dashboard"]
-        Charts["Chart.js Real-Time Visualizer"]
-        Controls["Index Toggle & Benchmark Switchboard"]
+    subgraph PresentationTier ["Presentation Tier (Browser)"]
+        UI["Web Dashboard (HTML5, Tailwind CSS)"]
+        Charts["Performance Visualizer (Chart.js)"]
+        LabControl["Index Switchboard & Benchmark Controls"]
     end
 
-    subgraph Server ["Application Logic Tier (Python Flask)"]
-        Router["REST API Router (/api/*)"]
-        Timer["Monotonic Benchmark Engine (time.perf_counter)"]
-        PlanParser["EXPLAIN / EXPLAIN ANALYZE Parser"]
-        Safety["Query Catalog Validator (Read-Only Guard)"]
+    subgraph ApplicationTier ["Application Tier (Flask)"]
+        API["REST API Layer (/api/*)"]
+        Timer["Monotonic Timing Module (time.perf_counter)"]
+        PlanParser["Execution Plan Parser (EXPLAIN ANALYZE)"]
+        Validator["Query Catalog Security Allow-list"]
     end
 
-    subgraph Storage ["Database Tier (MySQL 8.0+ InnoDB Engine)"]
-        Tables[("3NF Normalized Relations\n(Users, QueryCatalog, BenchmarkRuns,\nBenchmarkResults, IndexExperiments)")]
-        Triggers["Trigger: trg_benchmark_result_audit"]
-        Procedures["Stored Procedure: GetBenchmarkHistory()"]
-        Views["View: BenchmarkSummary"]
-        Testbed[("DemoRecords Testbed\n(100,000 Synthetic Rows)")]
+    subgraph DatabaseTier ["Database Tier (MySQL 8.0+ / InnoDB)"]
+        Schema["3NF Normalized Schema (7 System Relations)"]
+        Testbed["Synthetic Workload Table (DemoRecords - 100,000 Rows)"]
+        AuditTrigger["Trigger: trg_benchmark_result_audit"]
+        HistoryProc["Stored Procedure: GetBenchmarkHistory"]
+        SummaryView["View: BenchmarkSummary"]
     end
 
-    UI -->|HTTP POST /api/benchmark| Router
-    Router --> Safety
-    Safety --> Timer
-    Timer -->|Execute EXPLAIN ANALYZE| PlanParser
-    PlanParser --> Storage
-    Storage -->|Fire Trigger| Triggers
-    Storage -->|Return Rows & Cost Tree| PlanParser
-    PlanParser --> Router
-    Router -->|JSON Metrics & Plan| Charts
+    UI -->|HTTP POST /api/benchmark| API
+    API --> Validator
+    Validator --> Timer
+    Timer --> PlanParser
+    PlanParser --> DatabaseTier
+    DatabaseTier -->|AFTER INSERT| AuditTrigger
+    PlanParser --> API
+    API -->|JSON Payload| Charts
 ```
+
+### Components
+
+- **Presentation Tier**: Provides an interactive dashboard for initiating benchmarks, toggling B-Tree indexes, inspecting execution plans, and querying audit logs.
+- **Application Tier**: Implements API endpoints in Python Flask. Queries are strictly parameterized and mapped to an approved catalog to prevent SQL injection. Timings are captured using Python's monotonic clock to eliminate wall-clock drift.
+- **Database Tier**: MySQL 8.0 with InnoDB storage engine. Manages relational integrity with foreign keys, checks, cascade actions, triggers, and stored procedures.
 
 ---
 
-## 🗄️ Database Schema & Normalization (3NF)
+## Database Design and Normalization
 
-The schema is rigorously designed in **Third Normal Form (3NF)** to eliminate data redundancy, update anomalies, and insertion/deletion discrepancies.
+The database schema is normalized to **Third Normal Form (3NF)** to ensure zero insertion, update, or deletion anomalies.
 
 ### Entity-Relationship Diagram
 
 ```mermaid
 erDiagram
-    USERS ||--o{ QUERY_CATALOG : creates
-    USERS ||--o{ BENCHMARK_RUNS : initiates
-    QUERY_CATALOG ||--o{ BENCHMARK_RUNS : benchmarks
-    BENCHMARK_RUNS ||--o{ BENCHMARK_RESULTS : logs
-    BENCHMARK_RUNS ||--o{ INDEX_EXPERIMENTS : tracks
-    BENCHMARK_RUNS ||--o{ OPTIMIZATION_SUGGESTIONS : generates
-    BENCHMARK_RESULTS ||--|| BENCHMARK_AUDIT : "fires trigger to create"
+    Users ||--o{ QueryCatalog : defines
+    Users ||--o{ BenchmarkRuns : executes
+    QueryCatalog ||--o{ BenchmarkRuns : referenced_in
+    BenchmarkRuns ||--o{ BenchmarkResults : contains
+    BenchmarkRuns ||--o{ IndexExperiments : tracks
+    BenchmarkRuns ||--o{ OptimizationSuggestions : generates
+    BenchmarkResults ||--|| BenchmarkAudit : triggers
 
-    USERS {
+    Users {
         int user_id PK
         varchar full_name
         varchar email UK
         varchar role
         datetime created_at
     }
-    QUERY_CATALOG {
+    QueryCatalog {
         int query_id PK
         varchar query_name
         text query_sql
@@ -121,7 +118,7 @@ erDiagram
         int created_by FK
         datetime created_at
     }
-    BENCHMARK_RUNS {
+    BenchmarkRuns {
         int run_id PK
         int query_id FK
         int user_id FK
@@ -129,7 +126,7 @@ erDiagram
         text environment_note
         varchar status
     }
-    BENCHMARK_RESULTS {
+    BenchmarkResults {
         int result_id PK
         int run_id FK
         varchar test_label
@@ -138,7 +135,7 @@ erDiagram
         json plan_summary
         datetime recorded_at
     }
-    INDEX_EXPERIMENTS {
+    IndexExperiments {
         int experiment_id PK
         int run_id FK
         varchar index_name
@@ -146,7 +143,7 @@ erDiagram
         text notes
         datetime created_at
     }
-    OPTIMIZATION_SUGGESTIONS {
+    OptimizationSuggestions {
         int suggestion_id PK
         int run_id FK
         text suggestion_text
@@ -154,14 +151,14 @@ erDiagram
         varchar status
         datetime created_at
     }
-    BENCHMARK_AUDIT {
+    BenchmarkAudit {
         int audit_id PK
         int result_id FK
         varchar event_type
         datetime event_time
         text details
     }
-    DEMO_RECORDS {
+    DemoRecords {
         bigint record_id PK
         varchar category
         varchar status
@@ -171,17 +168,33 @@ erDiagram
     }
 ```
 
-### 3NF Proof & Functional Dependencies
-* **1NF**: All column values are atomic; repeating groups are prohibited.
-* **2NF**: All non-key attributes fully functionally depend on their respective primary keys (no partial dependencies on composite keys).
-* **3NF**: Non-prime attributes exhibit no transitive dependencies ($\text{Result ID} \rightarrow \text{Run ID} \rightarrow \text{Query ID} \rightarrow \text{Query Name}$). Query details are strictly kept in `QueryCatalog` and retrieved via foreign key joins.
+### Normalization Proof
+
+1. **First Normal Form (1NF)**:
+   - All relations consist of atomic attributes.
+   - Repeating groups and multi-valued fields are prohibited.
+
+2. **Second Normal Form (2NF)**:
+   - The relations satisfy 1NF.
+   - All relations utilize single-attribute surrogate primary keys (`user_id`, `query_id`, `run_id`, `result_id`). Consequently, partial functional dependencies on composite keys cannot exist.
+
+3. **Third Normal Form (3NF)**:
+   - The relations satisfy 2NF.
+   - Every non-key attribute is directly dependent on the candidate key with no transitive dependencies:
+     $$\text{result\_id} \rightarrow \text{run\_id} \rightarrow \text{query\_id} \rightarrow \text{query\_name}$$
+   - Attribute `query_name` is stored exclusively in `QueryCatalog` and retrieved via foreign key joins, eliminating redundancy.
 
 ---
 
-## ⚡ Database Programmability
+## Database Programmability
 
-### 1. Database Trigger: `trg_benchmark_result_audit`
-Fires automatically `AFTER INSERT` on `BenchmarkResults` to guarantee audit trail integrity without polluting application code:
+### Trigger Specification
+
+**Trigger Name**: `trg_benchmark_result_audit`  
+**Timing**: `AFTER INSERT`  
+**Target Table**: `BenchmarkResults`  
+**Functionality**: Automatically logs an immutable record into `BenchmarkAudit` upon every inserted benchmark measurement.
+
 ```sql
 DELIMITER //
 CREATE TRIGGER trg_benchmark_result_audit
@@ -203,15 +216,29 @@ END //
 DELIMITER ;
 ```
 
-### 2. Stored Procedure: `GetBenchmarkHistory`
-Encapsulates high-performance multi-table join logic at the database layer:
+### Stored Procedure Specification
+
+**Procedure Name**: `GetBenchmarkHistory`  
+**Parameters**: `IN p_query_id INT`  
+**Functionality**: Encapsulates a multi-relation join across `QueryCatalog`, `BenchmarkRuns`, and `BenchmarkResults`.
+
 ```sql
 DELIMITER //
-CREATE PROCEDURE GetBenchmarkHistory(IN p_query_id INT)
+CREATE PROCEDURE GetBenchmarkHistory(
+    IN p_query_id INT
+)
 BEGIN
     SELECT 
-        q.query_id, q.query_name, br.run_id, br.started_at, br.status,
-        res.result_id, res.test_label, res.elapsed_ms, res.rows_returned, res.recorded_at
+        q.query_id,
+        q.query_name,
+        br.run_id,
+        br.started_at,
+        br.status,
+        res.result_id,
+        res.test_label,
+        res.elapsed_ms,
+        res.rows_returned,
+        res.recorded_at
     FROM QueryCatalog AS q
     INNER JOIN BenchmarkRuns AS br ON q.query_id = br.query_id
     INNER JOIN BenchmarkResults AS res ON br.run_id = res.run_id
@@ -221,13 +248,24 @@ END //
 DELIMITER ;
 ```
 
-### 3. Database View: `BenchmarkSummary`
-Simplifies analytical reporting:
+### Analytical View
+
+**View Name**: `BenchmarkSummary`  
+**Functionality**: Materializes relational joins for reporting queries without query rewrites:
+
 ```sql
 CREATE OR REPLACE VIEW BenchmarkSummary AS
 SELECT 
-    q.query_id, q.query_name, br.run_id, br.started_at, br.status,
-    res.result_id, res.test_label, res.elapsed_ms, res.rows_returned, res.recorded_at
+    q.query_id,
+    q.query_name,
+    br.run_id,
+    br.started_at,
+    br.status,
+    res.result_id,
+    res.test_label,
+    res.elapsed_ms,
+    res.rows_returned,
+    res.recorded_at
 FROM QueryCatalog AS q
 INNER JOIN BenchmarkRuns AS br ON q.query_id = br.query_id
 INNER JOIN BenchmarkResults AS res ON br.run_id = res.run_id;
@@ -235,94 +273,117 @@ INNER JOIN BenchmarkResults AS res ON br.run_id = res.run_id;
 
 ---
 
-## 🛠️ Quick Start
+## Performance Evaluation
+
+Testing was conducted on a controlled dataset containing **100,000 records** in table `DemoRecords`.
+
+### Benchmark Results Table
+
+| Query Identifier | Workload Description | Baseline Latency (No Index) | Optimized Latency (B-Tree Index) | Access Type (Before) | Access Type (After) | Rows Examined | Latency Reduction (%) |
+|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| `Q1` | `WHERE status = 'ACTIVE'` | **42.85 ms** | **1.72 ms** | `ALL` | `ref` | 100,000 &rarr; 19,840 | **95.98%** |
+| `Q2` | `WHERE status = 'ACTIVE' AND category = 'ELECTRONICS'` | **38.40 ms** | **0.88 ms** | `ALL` | `ref` (Composite) | 100,000 &rarr; 2,480 | **97.71%** |
+| `Q3` | `WHERE status = 'PENDING' ORDER BY amount DESC LIMIT 100` | **51.20 ms** | **2.15 ms** | `ALL` (Using filesort) | `ref` | 100,000 &rarr; 100 | **95.80%** |
+
+### Mathematical Formulation
+
+Latency reduction percentage is computed as follows:
+
+$$\text{Percentage Improvement} = \left( \frac{T_{\text{baseline}} - T_{\text{optimized}}}{T_{\text{baseline}}} \right) \times 100$$
+
+Where:
+- $T_{\text{baseline}}$ is the arithmetic mean latency across $N$ baseline executions without secondary indexes.
+- $T_{\text{optimized}}$ is the arithmetic mean latency across $N$ executions with an active B-Tree index.
+
+---
+
+## Installation and Setup
 
 ### Prerequisites
-* **Python 3.10+**
-* **MySQL 8.0+** (Optional - system auto-falls back to embedded SQLite if MySQL is offline)
-* Modern web browser (Chrome, Edge, Firefox, Brave)
 
-### Installation & Launch
+- Python 3.10 or higher
+- MySQL Server 8.0 or higher
+- MySQL Connector/Python or PyMySQL
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/anoopcodehack/DBMS_query_analyzer.git
-   cd DBMS_query_analyzer
-   ```
+### Step 1: Clone Repository
+```bash
+git clone https://github.com/anoopcodehack/DBMS_query_analyzer.git
+cd DBMS_query_analyzer
+```
 
-2. **Configure Environment** (Optional):
-   Copy `.env.example` to `.env` and verify database credentials:
-   ```env
-   DB_ENGINE=MYSQL
-   DB_HOST=localhost
-   DB_PORT=3306
-   DB_NAME=query_performance_analyzer
-   DB_USER=root
-   DB_PASSWORD=
-   FLASK_PORT=5000
-   ```
+### Step 2: Configure Environment
+Copy `.env.example` to `.env` and adjust database credentials as required:
+```bash
+cp .env.example .env
+```
 
-3. **Install Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+Default configuration in `.env`:
+```ini
+DB_ENGINE=MYSQL
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=query_performance_analyzer
+DB_USER=root
+DB_PASSWORD=
+FLASK_PORT=5000
+FLASK_DEBUG=True
+```
 
-4. **Initialize MySQL Schema & Seed 100,000 Records**:
-   ```sql
-   -- Run in MySQL Workbench or CLI
-   SOURCE database/schema.sql;
-   ```
-   ```bash
-   -- Populate 100,000 synthetic testbed records
-   python database/seed_data.py
-   ```
+### Step 3: Install Python Dependencies
+```bash
+pip install -r requirements.txt
+```
 
-5. **Run the Application**:
-   * **Windows 1-Click**: Double-click `run.bat`
-   * **Command Line**:
-     ```bash
-     python app.py
-     ```
-   Open your browser at: **`http://localhost:5000`**
+### Step 4: Initialize MySQL Database
+Execute `database/schema.sql` via MySQL Workbench or the MySQL command line interface:
+```bash
+mysql -u root -p < database/schema.sql
+```
 
----
+### Step 5: Seed Synthetic Benchmark Records
+Run the bulk generator to populate 100,000 rows into `DemoRecords`:
+```bash
+python database/seed_data.py
+```
 
-## 📊 Performance Benchmark Results
+### Step 6: Start Application Server
+```bash
+python app.py
+```
+Or execute the Windows launcher:
+```cmd
+run.bat
+```
 
-Empirical performance evaluation performed on a **100,000-row dataset** (`DemoRecords`):
+Access the interface at `http://localhost:5000`.
 
-| Workload Description | Query SQL | Baseline Latency (No Index) | Optimized Latency (B-Tree Index) | Access Type Before $\rightarrow$ After | Examined Rows Before $\rightarrow$ After | Speedup ($\%$) |
-|---|---|:---:|:---:|:---:|:---:|:---:|
-| **Status Filter** | `SELECT * FROM DemoRecords WHERE status = 'ACTIVE'` | **42.85 ms** | **1.72 ms** | `ALL` $\rightarrow$ `ref` | $100,000 \rightarrow 19,840$ | **95.9% Faster 🚀** |
-| **Composite Filter** | `SELECT * FROM DemoRecords WHERE status = 'ACTIVE' AND category = 'ELECTRONICS'` | **38.40 ms** | **0.88 ms** | `ALL` $\rightarrow$ `ref` | $100,000 \rightarrow 2,480$ | **97.7% Faster 🚀** |
-| **Sorted High-Value Orders** | `SELECT * FROM DemoRecords WHERE status = 'PENDING' ORDER BY amount DESC LIMIT 100` | **51.20 ms** | **2.15 ms** | `ALL (Using filesort)` $\rightarrow$ `ref` | $100,000 \rightarrow 100$ | **95.8% Faster 🚀** |
-
-$$\text{Percentage Improvement} = \frac{T_{\text{baseline}} - T_{\text{optimized}}}{T_{\text{baseline}}} \times 100 = \frac{42.85 - 1.72}{42.85} \times 100 = 95.98\%$$
+*Note: If MySQL server is unreachable, the application initializes an embedded SQLite testbed to guarantee demonstration continuity.*
 
 ---
 
-## 🔌 API Reference
+## API Reference
 
-### 1. Execute Benchmark
-```http
-POST /api/benchmark
-Content-Type: application/json
+### POST `/api/benchmark`
+Executes an approved query from the catalog and records performance metrics.
 
+**Request Body**:
+```json
 {
   "query_id": 1,
-  "test_label": "BASELINE_FULL_SCAN",
+  "test_label": "BASELINE_RUN",
   "repetitions": 3
 }
 ```
+
 **Response (200 OK)**:
 ```json
 {
   "success": true,
   "query_id": 1,
   "query_name": "Active Status Filter",
-  "average_elapsed_ms": 1.72,
+  "average_elapsed_ms": 1.724,
   "latest_result": {
-    "elapsed_ms": 1.68,
+    "elapsed_ms": 1.681,
     "rows_returned": 19840,
     "plan": {
       "explain_analyze": "-> Index lookup on DemoRecords using idx_demo_records_status (status='ACTIVE') (cost=2182.40 rows=19840)"
@@ -331,88 +392,71 @@ Content-Type: application/json
 }
 ```
 
-### 2. Toggle B-Tree Index Experiment
-```http
-POST /api/indexes/toggle
-Content-Type: application/json
+### POST `/api/indexes/toggle`
+Creates or drops secondary B-Tree indexes on `DemoRecords`.
 
+**Request Body**:
+```json
 {
   "index_name": "idx_demo_records_status",
   "action": "CREATE"
 }
 ```
 
-### 3. Invoke Stored Procedure History
-```http
-GET /api/history/1
-```
+### GET `/api/history/<int:query_id>`
+Invokes stored procedure `GetBenchmarkHistory` for a specified query ID.
 
-### 4. Fetch Trigger Audit Logs
-```http
-GET /api/audit
-```
+### GET `/api/view/summary`
+Queries `BenchmarkSummary` view for cross-relation reporting data.
 
----
-
-## 🎓 Viva Voce & Technical Interview Guide
-
-<details>
-<summary><strong>1. Why is B-Tree indexing vastly superior to a Full Table Scan?</strong></summary>
-A Full Table Scan requires sequential read of all disk pages containing table data ($O(N)$ complexity). For 100,000 rows, this consumes excessive buffer pool memory and disk I/O. A B-Tree index maintains a sorted, self-balancing search tree ($O(\log N)$ complexity). In MySQL InnoDB, secondary indexes store the indexed column values and a pointer to the clustered primary key, allowing direct root-to-leaf traversals in typically 3 to 4 disk page reads.
-</details>
-
-<details>
-<summary><strong>2. What is the difference between EXPLAIN and EXPLAIN ANALYZE?</strong></summary>
-<code>EXPLAIN</code> estimates the execution plan using optimizer statistics without running the query. <code>EXPLAIN ANALYZE</code> (introduced in MySQL 8.0.18) actually executes the statement, measures the real elapsed execution time spent in each iterator node of the tree, and contrasts estimated row counts against actual rows returned.
-</details>
-
-<details>
-<summary><strong>3. Why should benchmarking use a Query Catalog instead of arbitrary user input?</strong></summary>
-Allowing unrestricted SQL inputs exposes the server to SQL injection attacks, accidental table destruction (<code>DROP TABLE</code>, unindexed <code>DELETE</code>), and server-side CPU resource exhaustion. The Query Catalog enforces an allow-list of vetted read-only SELECT queries.
-</details>
-
-<details>
-<summary><strong>4. How is Third Normal Form (3NF) verified in this design?</strong></summary>
-All tables have a single-column surrogate primary key, eliminating partial dependencies (2NF satisfied). No non-prime attribute determines another non-prime attribute (transitive dependency free). For example, <code>query_name</code> is never duplicated in <code>BenchmarkResults</code>; it is normalized into <code>QueryCatalog</code> and joined at read-time.
-</details>
-
-<details>
-<summary><strong>5. What is the purpose of the AFTER INSERT trigger?</strong></summary>
-The <code>trg_benchmark_result_audit</code> trigger demonstrates database-level event handling. When a benchmark measurement is written to <code>BenchmarkResults</code>, the database engine synchronously creates an audit trail entry in <code>BenchmarkAudit</code> without requiring extra round-trips from the application layer.
-</details>
+### GET `/api/audit`
+Returns the recent audit records generated by `trg_benchmark_result_audit`.
 
 ---
 
-## 📂 Project Directory Structure
+## Technical Reference and Viva Guide
+
+### 1. Algorithmic Complexity: B-Tree Index vs Full Table Scan
+A Full Table Scan evaluates every record in sequential memory pages, exhibiting $O(N)$ computational and I/O complexity. For 100,000 records, MySQL must read and scan every row into memory. In contrast, an InnoDB B+Tree index structures search keys into balanced hierarchy nodes of $O(\log N)$ complexity. The database engine traverses root, intermediate, and leaf nodes, reaching target pointers in 3 to 4 logical reads.
+
+### 2. EXPLAIN versus EXPLAIN ANALYZE
+- `EXPLAIN`: Employs optimizer metadata and table statistics to produce an estimated execution plan without running the statement.
+- `EXPLAIN ANALYZE`: Available in MySQL 8.0.18+, this command executes the statement, measures actual time spent at each iterator node in milliseconds, and prints the exact execution tree along with actual row counts.
+
+### 3. Query Catalog Security Architecture
+Direct input of arbitrary SQL introduces severe vulnerabilities, including SQL injection and accidental data destruction (`DROP`, unindexed `DELETE`). The Query Catalog enforces an allow-list pattern: incoming requests pass a validated `query_id`, and the server maps it exclusively to pre-vetted, read-only SELECT statements.
+
+### 4. Third Normal Form Verification
+The schema conforms to 3NF because all transitive dependencies are resolved. For instance, query metadata (`query_name`, `query_sql`) is strictly decoupled from execution instances (`BenchmarkRuns`) and measurement outcomes (`BenchmarkResults`). Each measurement record references its run via `run_id`, avoiding repeated text fields.
+
+### 5. Database Trigger Mechanics
+The trigger `trg_benchmark_result_audit` utilizes the `AFTER INSERT` hook on `BenchmarkResults`. Using the `NEW` pseudorow reference, it extracts `NEW.result_id`, `NEW.test_label`, and `NEW.elapsed_ms` and commits them to `BenchmarkAudit` in the same database transaction.
+
+---
+
+## Project Directory Structure
 
 ```text
 d:\DBMS_query_analyzer\
-├── .env.example               # Environment variables configuration template
-├── .gitignore                  # Production Git ignore patterns
-├── README.md                   # Comprehensive architectural documentation
-├── requirements.txt            # Python dependencies (Flask, MySQL connector, PyMySQL)
-├── run.bat                     # 1-click Windows runner script
-├── app.py                      # Flask REST API & Monotonic Benchmark Engine
+├── .env.example               # Environment variables template
+├── .gitignore                  # Git exclude patterns
+├── README.md                   # System documentation and technical manual
+├── requirements.txt            # Python package requirements
+├── run.bat                     # Windows deployment script
+├── app.py                      # Flask backend and benchmarking engine
 ├── database/
-│   ├── schema.sql              # 3NF Schema: 8 tables, Triggers, SPs, Views
-│   ├── seed_data.py            # High-speed bulk generator (100k synthetic rows)
-│   └── test_queries.sql        # MySQL Workbench test scripts for report figures
+│   ├── schema.sql              # Relational schema (DDL, triggers, procedures, views)
+│   ├── seed_data.py            # Bulk batch dataset generator (100k rows)
+│   └── test_queries.sql        # Verification queries for report screenshots
 ├── static/
 │   └── js/
-│       └── dashboard.js        # UI controller & Chart.js visualizer
+│       └── dashboard.js        # Dashboard logic and Chart.js controller
 └── templates/
-    └── index.html              # Responsive Tailwind CSS dashboard
+    └── index.html              # User interface template
 ```
 
 ---
 
-## 👥 Authors & Academic Credits
+## License
 
-* **Institution**: Sahyadri College of Engineering & Management, Adyar, Mangaluru, Karnataka
-* **Department**: Department of Computer Science & Engineering
-* **Coursework**: Database Management Systems (DBMS) Mini-Project (Academic Year: 2026–2027)
-
----
-
-## 📄 License
-This project is licensed under the **MIT License** - see the LICENSE file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for full terms.
