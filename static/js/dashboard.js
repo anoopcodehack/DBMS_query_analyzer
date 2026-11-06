@@ -1,6 +1,6 @@
 /**
- * Database Query Performance Analyzer & Optimization System
- * Clean Developer Light Interface Controller & Benchmark Visualizer
+ * QueryMetrics — Database Query Performance Analyzer & Optimization System
+ * Warm Porcelain & Editorial Minimal Theme Controller & Benchmark Visualizer
  */
 
 let catalogData = [];
@@ -48,10 +48,10 @@ function switchTab(tabId) {
         if (el && btn) {
             if (t === tabId) {
                 el.classList.remove('hidden');
-                btn.className = 'tab-btn px-4 py-2 rounded-lg bg-blue-600 text-white flex items-center space-x-2 transition shadow-sm font-semibold text-xs';
+                btn.className = 'tab-link text-[#141414] font-bold border-b-2 border-[#141414] pb-1 transition';
             } else {
                 el.classList.add('hidden');
-                btn.className = 'tab-btn px-4 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center space-x-2 transition font-semibold text-xs';
+                btn.className = 'tab-link text-neutral-500 hover:text-[#141414] font-medium transition';
             }
         }
     });
@@ -69,17 +69,17 @@ async function fetchSystemStatus() {
         const res = await fetch('/api/status');
         const data = await res.json();
         
-        document.getElementById('statRecordsCount').innerText = (data.records_count || 0).toLocaleString();
-        document.getElementById('statQueriesCount').innerText = data.total_queries || '0';
-        document.getElementById('statRunsCount').innerText = data.total_runs || '0';
-        document.getElementById('statActiveIndexes').innerText = data.active_indexes?.length || '0';
+        const recCount = document.getElementById('statRecordsCount');
+        if (recCount) recCount.innerText = (data.records_count || 0).toLocaleString();
 
         // Engine Status Text
         const text = document.getElementById('engineStatusText');
-        if (data.engine === 'MYSQL') {
-            text.innerText = `MySQL 8.0 (${data.mysql_config?.database || 'Connected'})`;
-        } else {
-            text.innerText = `SQLite Engine (Zero-Config Testbed)`;
+        if (text) {
+            if (data.engine === 'MYSQL') {
+                text.innerText = `MySQL 8.0 (${data.mysql_config?.database || 'Connected'})`;
+            } else {
+                text.innerText = `SQLite Engine`;
+            }
         }
 
         // Update Index experiment badges
@@ -88,31 +88,35 @@ async function fetchSystemStatus() {
         // Status Index
         const statusBadge = document.getElementById('badge-status-idx');
         const statusBtn = document.getElementById('btn-status-idx');
-        if (activeIdxNames.includes('idx_demo_records_status')) {
-            statusBadge.innerText = 'ACTIVE (INDEXED)';
-            statusBadge.className = 'text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
-            statusBtn.innerText = 'Drop Index';
-            statusBtn.className = 'w-full py-1.5 text-xs font-semibold rounded bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 transition shadow-xs';
-        } else {
-            statusBadge.innerText = 'DISABLED (FULL SCAN)';
-            statusBadge.className = 'text-[10px] px-2 py-0.5 rounded font-mono font-medium bg-slate-100 text-slate-600 border border-slate-200';
-            statusBtn.innerText = 'Create Index';
-            statusBtn.className = 'w-full py-1.5 text-xs font-bold rounded bg-blue-600 hover:bg-blue-700 text-white transition shadow-sm';
+        if (statusBadge && statusBtn) {
+            if (activeIdxNames.includes('idx_demo_records_status')) {
+                statusBadge.innerText = 'ACTIVE (INDEXED)';
+                statusBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-[#141414] text-white';
+                statusBtn.innerText = 'Drop Index';
+                statusBtn.className = 'w-full py-1.5 text-xs font-semibold rounded-full bg-white/80 hover:bg-white text-neutral-800 transition shadow-xs';
+            } else {
+                statusBadge.innerText = 'DISABLED (FULL SCAN)';
+                statusBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-mono font-medium bg-black/10 text-neutral-700';
+                statusBtn.innerText = 'Create Index';
+                statusBtn.className = 'w-full py-1.5 text-xs font-bold rounded-full bg-[#141414] hover:bg-neutral-800 text-white transition shadow-sm';
+            }
         }
 
         // Composite Index
         const compBadge = document.getElementById('badge-composite-idx');
         const compBtn = document.getElementById('btn-composite-idx');
-        if (activeIdxNames.includes('idx_demo_status_category')) {
-            compBadge.innerText = 'ACTIVE (INDEXED)';
-            compBadge.className = 'text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
-            compBtn.innerText = 'Drop Index';
-            compBtn.className = 'w-full py-1.5 text-xs font-semibold rounded bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 transition shadow-xs';
-        } else {
-            compBadge.innerText = 'DISABLED (FULL SCAN)';
-            compBadge.className = 'text-[10px] px-2 py-0.5 rounded font-mono font-medium bg-slate-100 text-slate-600 border border-slate-200';
-            compBtn.innerText = 'Create Index';
-            compBtn.className = 'w-full py-1.5 text-xs font-bold rounded bg-blue-600 hover:bg-blue-700 text-white transition shadow-sm';
+        if (compBadge && compBtn) {
+            if (activeIdxNames.includes('idx_demo_status_category')) {
+                compBadge.innerText = 'ACTIVE (INDEXED)';
+                compBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-[#141414] text-white';
+                compBtn.innerText = 'Drop Index';
+                compBtn.className = 'w-full py-1.5 text-xs font-semibold rounded-full bg-white/80 hover:bg-white text-neutral-800 transition shadow-xs';
+            } else {
+                compBadge.innerText = 'DISABLED (FULL SCAN)';
+                compBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-mono font-medium bg-black/10 text-neutral-700';
+                compBtn.innerText = 'Create Index';
+                compBtn.className = 'w-full py-1.5 text-xs font-bold rounded-full bg-[#141414] hover:bg-neutral-800 text-white transition shadow-sm';
+            }
         }
 
     } catch (err) {
@@ -132,40 +136,46 @@ async function fetchCatalog() {
         const spSelect = document.getElementById('spQuerySelect');
         const tableBody = document.getElementById('catalogTableBody');
         
-        select.innerHTML = '';
-        spSelect.innerHTML = '';
-        tableBody.innerHTML = '';
+        if (select) select.innerHTML = '';
+        if (spSelect) spSelect.innerHTML = '';
+        if (tableBody) tableBody.innerHTML = '';
 
         catalogData.forEach(q => {
-            const opt = document.createElement('option');
-            opt.value = q.query_id;
-            opt.innerText = `Q${q.query_id}: ${q.query_name}`;
-            select.appendChild(opt);
+            if (select) {
+                const opt = document.createElement('option');
+                opt.value = q.query_id;
+                opt.innerText = `Q${q.query_id}: ${q.query_name}`;
+                select.appendChild(opt);
+            }
 
-            const spOpt = document.createElement('option');
-            spOpt.value = q.query_id;
-            spOpt.innerText = `Q${q.query_id}: ${q.query_name}`;
-            spSelect.appendChild(spOpt);
+            if (spSelect) {
+                const spOpt = document.createElement('option');
+                spOpt.value = q.query_id;
+                spOpt.innerText = `Q${q.query_id}: ${q.query_name}`;
+                spSelect.appendChild(spOpt);
+            }
 
             const meta = WORKLOAD_DESCRIPTIONS[q.query_id] || { category: "GENERAL", explanation: q.description };
 
-            const tr = document.createElement('tr');
-            tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
-            tr.innerHTML = `
-                <td class="py-2.5 px-3 font-mono font-bold text-slate-500">#${q.query_id}</td>
-                <td class="py-2.5 px-3 font-bold text-slate-900">
-                    ${q.query_name}
-                    <div class="text-[10px] text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded font-mono mt-0.5 font-bold inline-block">${meta.category}</div>
-                </td>
-                <td class="py-2.5 px-3 font-mono text-slate-700 max-w-xs truncate">${q.query_sql}</td>
-                <td class="py-2.5 px-3 text-slate-600 font-sans text-xs">${q.description}</td>
-                <td class="py-2.5 px-3 text-right">
-                    <button onclick="selectAndBenchmark(${q.query_id})" class="px-3 py-1 text-xs font-bold rounded bg-blue-600 hover:bg-blue-700 text-white transition shadow-sm">
-                        Select
-                    </button>
-                </td>
-            `;
-            tableBody.appendChild(tr);
+            if (tableBody) {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-[#f4efe4]/60 transition border-b border-[#e7e4dc]";
+                tr.innerHTML = `
+                    <td class="py-3 px-3 font-mono font-bold text-neutral-500">#${q.query_id}</td>
+                    <td class="py-3 px-3 font-bold text-[#141414]">
+                        ${q.query_name}
+                        <div class="text-[10px] text-neutral-600 bg-[#ece8df] px-2 py-0.5 rounded-full font-mono mt-0.5 font-bold inline-block border border-[#d6d0c2]">${meta.category}</div>
+                    </td>
+                    <td class="py-3 px-3 font-mono text-neutral-700 max-w-xs truncate">${q.query_sql}</td>
+                    <td class="py-3 px-3 text-neutral-600 font-sans text-xs">${q.description}</td>
+                    <td class="py-3 px-3 text-right">
+                        <button onclick="selectAndBenchmark(${q.query_id})" class="px-3.5 py-1 text-xs font-bold rounded-full bg-[#141414] hover:bg-neutral-800 text-white transition shadow-xs">
+                            Select
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            }
         });
 
         if (catalogData.length > 0) onQuerySelected();
@@ -200,7 +210,7 @@ async function runAutomatedComparison() {
     if (!queryId) return;
 
     btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Evaluating Baseline & Indexed Plans...</span>`;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i><span>Comparing...</span>`;
 
     try {
         const res = await fetch('/api/benchmark/compare', {
@@ -221,31 +231,34 @@ async function runAutomatedComparison() {
         lastBaseline = { ms: b.elapsed_ms };
         lastOptimized = { ms: o.elapsed_ms };
 
-        document.getElementById('baselineTime').innerText = `${b.elapsed_ms.toFixed(2)} ms`;
-        document.getElementById('baselineMethod').innerText = b.access_type;
-        document.getElementById('baselineRows').innerText = (b.rows_returned || 0).toLocaleString();
-
-        document.getElementById('optimizedTime').innerText = `${o.elapsed_ms.toFixed(2)} ms`;
-        document.getElementById('optimizedMethod').innerText = o.access_type;
-        document.getElementById('optimizedRows').innerText = (o.rows_returned || 0).toLocaleString();
+        const optTimeEl = document.getElementById('optimizedTime');
+        const optMethodEl = document.getElementById('optimizedMethod');
+        if (optTimeEl) optTimeEl.innerText = `${o.elapsed_ms.toFixed(2)} ms`;
+        if (optMethodEl) optMethodEl.innerText = `ref (B-Tree)`;
 
         // Speedup Badge
         const badge = document.getElementById('speedupBadge');
         const text = document.getElementById('speedupText');
-        badge.classList.remove('hidden');
-        text.innerText = `${exp.speedup_pct}% Latency Reduction!`;
+        if (badge && text) {
+            badge.classList.remove('hidden');
+            text.innerText = `${exp.speedup_pct}% Latency Drop`;
+        }
 
         // Update Chart
         updateChart();
 
         // Update Explanation
-        document.getElementById('diagAccessPath').innerText = exp.io_impact;
-        document.getElementById('diagIoImpact').innerText = exp.buffer_pool_note;
-        document.getElementById('diagFormula').innerText = exp.formula;
+        const diagIo = document.getElementById('diagIoImpact');
+        const diagForm = document.getElementById('diagFormula');
+        if (diagIo) diagIo.innerText = exp.buffer_pool_note;
+        if (diagForm) diagForm.innerText = `((T_base - T_opt) / T_base) * 100 = ${exp.speedup_pct}%`;
 
         // Execution Plan Output
         const planText = o.plan?.explain_analyze || JSON.stringify(o.plan, null, 2);
-        document.getElementById('explainOutput').innerText = `=== OPTIMIZED EXECUTION PLAN (EXPLAIN ANALYZE) ===\n${planText}\n\n=== BASELINE EXECUTION PLAN (ALL FULL SCAN) ===\n${b.plan?.explain_analyze || JSON.stringify(b.plan, null, 2)}`;
+        const expOutput = document.getElementById('explainOutput');
+        if (expOutput) {
+            expOutput.innerText = `=== OPTIMIZED EXECUTION PLAN (EXPLAIN ANALYZE) ===\n${planText}\n\n=== BASELINE EXECUTION PLAN (ALL FULL SCAN) ===\n${b.plan?.explain_analyze || JSON.stringify(b.plan, null, 2)}`;
+        }
 
         await fetchSystemStatus();
 
@@ -254,7 +267,7 @@ async function runAutomatedComparison() {
         alert('Comparative benchmark failed.');
     } finally {
         btn.disabled = false;
-        btn.innerHTML = `<i class="fa-solid fa-bolt text-xs"></i> <span>Run Automated Comparison</span>`;
+        btn.innerHTML = `<span>Run comparison</span><span class="text-sm font-mono">&nearr;</span>`;
     }
 }
 
@@ -270,7 +283,7 @@ async function runBenchmark() {
     if (!queryId) return;
 
     runBtn.disabled = true;
-    runBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Sampling (${reps}x)...</span>`;
+    runBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-[10px]"></i>`;
 
     try {
         const res = await fetch('/api/benchmark', {
@@ -302,15 +315,13 @@ async function runBenchmark() {
 
         if (testLabel.toUpperCase().includes('BASE') || !lastBaseline) {
             lastBaseline = { ms: avgMs, scanType: scanType, rows: rows, label: testLabel };
-            document.getElementById('baselineTime').innerText = `${avgMs.toFixed(2)} ms`;
-            document.getElementById('baselineMethod').innerText = scanType;
-            document.getElementById('baselineRows').innerText = rows.toLocaleString();
             document.getElementById('testLabelInput').value = 'OPTIMIZED_INDEX';
         } else {
             lastOptimized = { ms: avgMs, scanType: scanType, rows: rows, label: testLabel };
-            document.getElementById('optimizedTime').innerText = `${avgMs.toFixed(2)} ms`;
-            document.getElementById('optimizedMethod').innerText = scanType;
-            document.getElementById('optimizedRows').innerText = rows.toLocaleString();
+            const optTimeEl = document.getElementById('optimizedTime');
+            const optMethodEl = document.getElementById('optimizedMethod');
+            if (optTimeEl) optTimeEl.innerText = `${avgMs.toFixed(2)} ms`;
+            if (optMethodEl) optMethodEl.innerText = scanType;
             document.getElementById('testLabelInput').value = 'BASELINE_SCAN';
         }
 
@@ -321,19 +332,24 @@ async function runBenchmark() {
                 const pct = (((b - o) / b) * 100).toFixed(1);
                 const badge = document.getElementById('speedupBadge');
                 const text = document.getElementById('speedupText');
-                badge.classList.remove('hidden');
-                text.innerText = `${pct}% Latency Reduction!`;
-                document.getElementById('diagFormula').innerText = `Improvement (%) = ((${b} - ${o}) / ${b}) * 100 = ${pct}%`;
+                if (badge && text) {
+                    badge.classList.remove('hidden');
+                    text.innerText = `${pct}% Latency Drop`;
+                }
+                const diagForm = document.getElementById('diagFormula');
+                if (diagForm) diagForm.innerText = `((T_base - T_opt) / T_base) * 100 = ${pct}%`;
             }
         }
 
         updateChart();
 
         const explainOutput = document.getElementById('explainOutput');
-        if (plan.explain_analyze) {
-            explainOutput.innerText = plan.explain_analyze;
-        } else {
-            explainOutput.innerText = JSON.stringify(plan, null, 2);
+        if (explainOutput) {
+            if (plan.explain_analyze) {
+                explainOutput.innerText = plan.explain_analyze;
+            } else {
+                explainOutput.innerText = JSON.stringify(plan, null, 2);
+            }
         }
 
         await fetchSystemStatus();
@@ -342,7 +358,7 @@ async function runBenchmark() {
         console.error('Execution failed:', err);
     } finally {
         runBtn.disabled = false;
-        runBtn.innerHTML = `<i class="fa-solid fa-play text-xs"></i> <span>Execute Single Test</span>`;
+        runBtn.innerHTML = `<i class="fa-solid fa-play text-[10px]"></i>`;
     }
 }
 
@@ -354,7 +370,7 @@ async function toggleIndex(indexName) {
         ? document.getElementById('badge-status-idx') 
         : document.getElementById('badge-composite-idx');
         
-    const isCurrentlyActive = statusBadge.innerText.includes('ACTIVE');
+    const isCurrentlyActive = statusBadge?.innerText.includes('ACTIVE');
     const targetAction = isCurrentlyActive ? 'DROP' : 'CREATE';
 
     try {
@@ -375,27 +391,30 @@ async function toggleIndex(indexName) {
 }
 
 // -----------------------------------------------------------------------------
-// CLEAN LIGHT PALETTE CHART.JS CONTROLLER (Slate & Royal Blue)
+// MINIMAL EDITORIAL PALETTE CHART.JS CONTROLLER
 // -----------------------------------------------------------------------------
 function initChart() {
-    const ctx = document.getElementById('comparisonChart').getContext('2d');
+    const canvas = document.getElementById('comparisonChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    
     comparisonChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Baseline (No Index)', 'Optimized (B-Tree Indexed)'],
+            labels: ['Baseline (No Index)', 'Optimized (Indexed)'],
             datasets: [{
-                label: 'Query Latency (ms)',
+                label: 'Latency (ms)',
                 data: [0, 0],
                 backgroundColor: [
-                    '#94a3b8',   // Slate-400 (Baseline Full Table Scan)
-                    '#2563eb'    // Royal Blue (Optimized B-Tree Index Scan)
+                    '#a3a3a3',   // Neutral-400 (Baseline Scan)
+                    '#141414'    // Solid Pitch Charcoal (B-Tree Index Scan)
                 ],
                 borderColor: [
-                    '#64748b',   // Slate-500
-                    '#1d4ed8'    // Blue-700
+                    '#737373',
+                    '#000000'
                 ],
                 borderWidth: 1.5,
-                borderRadius: 6
+                borderRadius: 8
             }]
         },
         options: {
@@ -404,24 +423,24 @@ function initChart() {
             scales: {
                 y: {
                     beginAtZero: true,
-                    grid: { color: 'rgba(226, 232, 240, 0.8)' },
-                    ticks: { color: '#64748b', font: { family: 'Geist Mono, monospace', size: 10 } },
-                    title: { display: true, text: 'Latency (ms)', color: '#475569', font: { size: 11, weight: '600' } }
+                    grid: { color: 'rgba(231, 228, 220, 0.8)' },
+                    ticks: { color: '#737373', font: { family: 'Geist Mono, monospace', size: 10 } },
+                    title: { display: false }
                 },
                 x: {
                     grid: { display: false },
-                    ticks: { color: '#0f172a', font: { weight: '600', size: 11 } }
+                    ticks: { color: '#141414', font: { weight: '600', size: 11, family: 'Plus Jakarta Sans, sans-serif' } }
                 }
             },
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: '#0f172a',
+                    backgroundColor: '#141414',
                     titleColor: '#ffffff',
-                    bodyColor: '#f8fafc',
-                    borderColor: '#e2e8f0',
+                    bodyColor: '#faf8f5',
+                    borderColor: '#e7e4dc',
                     borderWidth: 1,
-                    padding: 10,
+                    padding: 8,
                     callbacks: {
                         label: (ctx) => ` Latency: ${ctx.raw} ms`
                     }
@@ -443,9 +462,10 @@ function updateChart() {
 // STORED PROCEDURE EXPLORER (`GetBenchmarkHistory`)
 // -----------------------------------------------------------------------------
 async function fetchStoredProcedureHistory() {
-    const qid = document.getElementById('spQuerySelect').value || 1;
+    const qid = document.getElementById('spQuerySelect')?.value || 1;
     const tableBody = document.getElementById('spTableBody');
-    tableBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-slate-400 font-mono"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Executing CALL GetBenchmarkHistory...</td></tr>';
+    if (!tableBody) return;
+    tableBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-neutral-400 font-mono"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Executing CALL GetBenchmarkHistory...</td></tr>';
 
     try {
         const res = await fetch(`/api/history/${qid}`);
@@ -453,21 +473,21 @@ async function fetchStoredProcedureHistory() {
         tableBody.innerHTML = '';
 
         if (!rows || rows.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-slate-500 font-mono">No benchmark runs recorded yet for this query.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-neutral-500 font-mono">No benchmark runs recorded yet for this query.</td></tr>';
             return;
         }
 
         rows.forEach(r => {
             const tr = document.createElement('tr');
-            tr.className = "hover:bg-slate-50 font-mono text-[11px] transition border-b border-slate-100";
+            tr.className = "hover:bg-[#f4efe4]/60 font-mono text-[11px] transition border-b border-[#e7e4dc]";
             tr.innerHTML = `
-                <td class="py-2.5 px-3 font-bold text-slate-500">#${r.result_id}</td>
-                <td class="py-2.5 px-3 text-slate-600">Run #${r.run_id}</td>
-                <td class="py-2.5 px-3 text-slate-900 font-sans font-semibold">${r.query_name}</td>
-                <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">${r.test_label}</span></td>
-                <td class="py-2.5 px-3 font-bold text-slate-900">${r.elapsed_ms.toFixed(3)} ms</td>
-                <td class="py-2.5 px-3 text-slate-700">${(r.rows_returned || 0).toLocaleString()}</td>
-                <td class="py-2.5 px-3 text-slate-500">${r.recorded_at}</td>
+                <td class="py-3 px-3 font-bold text-neutral-500">#${r.result_id}</td>
+                <td class="py-3 px-3 text-neutral-600">Run #${r.run_id}</td>
+                <td class="py-3 px-3 text-[#141414] font-sans font-semibold">${r.query_name}</td>
+                <td class="py-3 px-3"><span class="px-2 py-0.5 rounded-full bg-[#ece8df] text-neutral-800 border border-[#d6d0c2] text-[10px] font-bold">${r.test_label}</span></td>
+                <td class="py-3 px-3 font-bold text-[#141414]">${r.elapsed_ms.toFixed(3)} ms</td>
+                <td class="py-3 px-3 text-neutral-700">${(r.rows_returned || 0).toLocaleString()}</td>
+                <td class="py-3 px-3 text-neutral-500">${r.recorded_at}</td>
             `;
             tableBody.appendChild(tr);
         });
@@ -481,7 +501,8 @@ async function fetchStoredProcedureHistory() {
 // -----------------------------------------------------------------------------
 async function fetchSummaryView() {
     const tableBody = document.getElementById('viewTableBody');
-    tableBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-slate-400 font-mono"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Querying View BenchmarkSummary...</td></tr>';
+    if (!tableBody) return;
+    tableBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-neutral-400 font-mono"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Querying View BenchmarkSummary...</td></tr>';
 
     try {
         const res = await fetch('/api/view/summary');
@@ -489,21 +510,21 @@ async function fetchSummaryView() {
         tableBody.innerHTML = '';
 
         if (!rows || rows.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-slate-500 font-mono">View contains 0 rows. Run a benchmark test in the Lab first.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-neutral-500 font-mono">View contains 0 rows. Run a benchmark test in the Lab first.</td></tr>';
             return;
         }
 
         rows.forEach(r => {
             const tr = document.createElement('tr');
-            tr.className = "hover:bg-slate-50 font-mono text-[11px] transition border-b border-slate-100";
+            tr.className = "hover:bg-[#f4efe4]/60 font-mono text-[11px] transition border-b border-[#e7e4dc]";
             tr.innerHTML = `
-                <td class="py-2.5 px-3 font-bold text-slate-500">#${r.result_id}</td>
-                <td class="py-2.5 px-3 text-slate-900 font-sans font-semibold">${r.query_name}</td>
-                <td class="py-2.5 px-3"><span class="text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">${r.status}</span></td>
-                <td class="py-2.5 px-3 text-slate-700">${r.test_label}</td>
-                <td class="py-2.5 px-3 font-bold text-slate-900">${r.elapsed_ms.toFixed(3)} ms</td>
-                <td class="py-2.5 px-3 text-slate-700">${(r.rows_returned || 0).toLocaleString()}</td>
-                <td class="py-2.5 px-3 text-slate-500">${r.recorded_at}</td>
+                <td class="py-3 px-3 font-bold text-neutral-500">#${r.result_id}</td>
+                <td class="py-3 px-3 text-[#141414] font-sans font-semibold">${r.query_name}</td>
+                <td class="py-3 px-3"><span class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-[#d8eed2] text-[#142315] border border-[#c2e2ba]">${r.status}</span></td>
+                <td class="py-3 px-3 text-neutral-700">${r.test_label}</td>
+                <td class="py-3 px-3 font-bold text-[#141414]">${r.elapsed_ms.toFixed(3)} ms</td>
+                <td class="py-3 px-3 text-neutral-700">${(r.rows_returned || 0).toLocaleString()}</td>
+                <td class="py-3 px-3 text-neutral-500">${r.recorded_at}</td>
             `;
             tableBody.appendChild(tr);
         });
@@ -517,7 +538,8 @@ async function fetchSummaryView() {
 // -----------------------------------------------------------------------------
 async function fetchAuditLogs() {
     const tableBody = document.getElementById('auditTableBody');
-    tableBody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-400 font-mono"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Reading BenchmarkAudit table...</td></tr>';
+    if (!tableBody) return;
+    tableBody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-neutral-400 font-mono"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Reading BenchmarkAudit table...</td></tr>';
 
     try {
         const res = await fetch('/api/audit');
@@ -525,19 +547,19 @@ async function fetchAuditLogs() {
         tableBody.innerHTML = '';
 
         if (!rows || rows.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-500 font-mono">No trigger audit logs registered yet.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-neutral-500 font-mono">No trigger audit logs registered yet.</td></tr>';
             return;
         }
 
         rows.forEach(r => {
             const tr = document.createElement('tr');
-            tr.className = "hover:bg-slate-50 font-mono text-[11px] transition border-b border-slate-100";
+            tr.className = "hover:bg-[#f4efe4]/60 font-mono text-[11px] transition border-b border-[#e7e4dc]";
             tr.innerHTML = `
-                <td class="py-2.5 px-3 font-bold text-slate-500">#${r.audit_id}</td>
-                <td class="py-2.5 px-3 text-slate-600">Result #${r.result_id}</td>
-                <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">${r.event_type}</span></td>
-                <td class="py-2.5 px-3 text-slate-500">${r.event_time}</td>
-                <td class="py-2.5 px-3 text-slate-700 font-sans text-xs">${r.details}</td>
+                <td class="py-3 px-3 font-bold text-neutral-500">#${r.audit_id}</td>
+                <td class="py-3 px-3 text-neutral-600">Result #${r.result_id}</td>
+                <td class="py-3 px-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#fae5cb] text-[#2a2016] border border-[#f2d5b5]">${r.event_type}</span></td>
+                <td class="py-3 px-3 text-neutral-500">${r.event_time}</td>
+                <td class="py-3 px-3 text-neutral-700 font-sans text-xs">${r.details}</td>
             `;
             tableBody.appendChild(tr);
         });
@@ -579,7 +601,7 @@ function closeConfigModal() {
 
 async function testAndSaveMysqlConfig() {
     const feedback = document.getElementById('cfgFeedback');
-    feedback.className = 'text-xs text-center text-slate-500';
+    feedback.className = 'text-xs text-center text-neutral-500';
     feedback.innerText = 'Verifying connection to MySQL server...';
 
     const payload = {
@@ -598,7 +620,7 @@ async function testAndSaveMysqlConfig() {
         });
         const data = await res.json();
         if (data.success) {
-            feedback.className = 'text-xs text-center text-emerald-600 font-bold';
+            feedback.className = 'text-xs text-center text-emerald-700 font-bold';
             feedback.innerText = data.message;
             setTimeout(() => {
                 closeConfigModal();
