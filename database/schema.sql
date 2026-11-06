@@ -1,8 +1,6 @@
 -- =============================================================================
 -- DATABASE QUERY PERFORMANCE ANALYZER AND OPTIMIZATION SYSTEM
--- Academic Mini-Project - Department of Computer Science & Engineering
--- Sahyadri College of Engineering & Management, Mangaluru
--- Academic Year: 2026-2027
+-- Relational Database Schema Specification (3NF Compliant)
 -- =============================================================================
 
 DROP DATABASE IF EXISTS query_performance_analyzer;
@@ -195,8 +193,8 @@ INNER JOIN BenchmarkResults AS res ON br.run_id = res.run_id;
 -- SEED INITIAL DATA: Default Users & Approved Query Catalog
 -- =============================================================================
 INSERT INTO Users (user_id, full_name, email, role) VALUES 
-(1, 'Lead DBA Analyst', 'analyst@sahyadri.edu.in', 'ADMIN'),
-(2, 'Student Researcher', 'student@sahyadri.edu.in', 'ANALYST');
+(1, 'Lead DBA Analyst', 'analyst@querymetrics.local', 'ADMIN'),
+(2, 'Systems Engineer', 'engineer@querymetrics.local', 'ANALYST');
 
 INSERT INTO QueryCatalog (query_id, query_name, query_sql, description, created_by) VALUES
 (1, 'Active Status Filter', 

@@ -1,7 +1,6 @@
 -- =============================================================================
--- ACADEMIC REPORT SCREENSHOT QUERIES & VIVA DEMO SCRIPT
+-- SYSTEM VERIFICATION & BENCHMARK VALIDATION SCRIPTS
 -- Project: DATABASE QUERY PERFORMANCE ANALYZER AND OPTIMIZATION SYSTEM
--- Sahyadri College of Engineering & Management, Mangaluru
 -- =============================================================================
 
 USE query_performance_analyzer;

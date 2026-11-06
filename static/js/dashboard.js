@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // TAB SWITCHBOARD
 // -----------------------------------------------------------------------------
 function switchTab(tabId) {
-    const tabs = ['lab', 'catalog', 'procedure', 'view', 'audit', 'viva'];
+    const tabs = ['lab', 'catalog', 'procedure', 'view', 'audit'];
     tabs.forEach(t => {
         const el = document.getElementById(`tab-${t}`);
         const btn = document.getElementById(`tabBtn-${t}`);

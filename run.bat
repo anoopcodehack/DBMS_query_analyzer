@@ -1,11 +1,10 @@
 @echo off
-title Database Query Performance Analyzer - Sahyadri College
+title Database Query Performance Analyzer
 color 0A
 cls
 echo =========================================================================
 echo    DATABASE QUERY PERFORMANCE ANALYZER AND OPTIMIZATION SYSTEM
-echo    Sahyadri College of Engineering and Management, Mangaluru
-echo    Academic Year: 2026-2027
+echo    High-Speed SQL Benchmarking & Execution Plan Analyzer
 echo =========================================================================
 echo.
 

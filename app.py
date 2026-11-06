@@ -2,7 +2,7 @@
 =============================================================================
 DATABASE QUERY PERFORMANCE ANALYZER AND OPTIMIZATION SYSTEM
 Flask Backend Server & API Controller
-Academic Mini-Project: Sahyadri College of Engineering & Management, Mangaluru
+High-Performance SQL Benchmarking & Query Optimization Suite
 =============================================================================
 """
 
@@ -79,7 +79,7 @@ def get_mysql_connection():
         raise RuntimeError("Neither mysql-connector-python nor pymysql is installed.")
 
 def init_sqlite_db():
-    """Initializes embedded SQLite database with 1:1 matching academic schema & trigger."""
+    """Initializes embedded SQLite database with 1:1 matching relational schema & trigger."""
     conn = sqlite3.connect(SQLITE_PATH)
     conn.execute("PRAGMA foreign_keys = ON;")
     cursor = conn.cursor()
@@ -223,8 +223,8 @@ def init_sqlite_db():
     # Default Users
     cursor.execute("SELECT COUNT(*) FROM Users;")
     if cursor.fetchone()[0] == 0:
-        cursor.execute("INSERT INTO Users (user_id, full_name, email, role) VALUES (1, 'Lead DBA Analyst', 'analyst@sahyadri.edu.in', 'ADMIN');")
-        cursor.execute("INSERT INTO Users (user_id, full_name, email, role) VALUES (2, 'Student Researcher', 'student@sahyadri.edu.in', 'ANALYST');")
+        cursor.execute("INSERT INTO Users (user_id, full_name, email, role) VALUES (1, 'Lead DBA Analyst', 'analyst@querymetrics.local', 'ADMIN');")
+        cursor.execute("INSERT INTO Users (user_id, full_name, email, role) VALUES (2, 'Systems Engineer', 'engineer@querymetrics.local', 'ANALYST');")
     
     # Default Query Catalog
     cursor.execute("SELECT COUNT(*) FROM QueryCatalog;")
@@ -1055,7 +1055,7 @@ if __name__ == '__main__':
     debug = os.getenv('FLASK_DEBUG', 'True').lower() == 'true'
     print("=" * 75)
     print(" DATABASE QUERY PERFORMANCE ANALYZER AND OPTIMIZATION SYSTEM")
-    print(f" Department of CSE, Sahyadri College of Engineering & Management")
+    print(f" Database Query Performance Analyzer & Optimization System")
     print(f" Active Database Engine: {active_engine}")
     print(f" Running Web Dashboard at: http://localhost:{port}")
     print("=" * 75)

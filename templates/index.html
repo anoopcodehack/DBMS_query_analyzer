@@ -73,7 +73,7 @@
                 </div>
                 <div class="flex items-baseline space-x-2">
                     <span class="font-extrabold text-lg tracking-tight text-[#141414]">QueryMetrics</span>
-                    <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[#ece8df] text-neutral-600 border border-[#d6d0c2]">DBMS Lab</span>
+                    <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[#ece8df] text-neutral-600 border border-[#d6d0c2]">v1.0-release</span>
                 </div>
             </div>
 
@@ -93,9 +93,6 @@
                 </button>
                 <button onclick="switchTab('audit')" id="tabBtn-audit" class="tab-link text-neutral-500 hover:text-[#141414] font-medium transition">
                     Audit Trail
-                </button>
-                <button onclick="switchTab('viva')" id="tabBtn-viva" class="tab-link text-neutral-500 hover:text-[#141414] font-medium transition">
-                    Viva Guide
                 </button>
 
                 <!-- Thin Vertical Divider -->
@@ -120,7 +117,7 @@
                 <!-- Left Sub-column (Col 1-3): Intro text, Black pill button, Hairline divider, Dropdown -->
                 <div class="lg:col-span-3 space-y-4">
                     <p class="text-xs text-neutral-600 leading-relaxed font-medium">
-                        Introducing our query benchmark platform designed specifically for computer science students, database administrators, and software engineers alike!
+                        Introducing our query benchmark platform designed specifically for database administrators, backend architects, and software engineers alike!
                     </p>
 
                     <!-- Black Pill Button with Arrow (Exact copy of 'Contact sales ↗') -->
@@ -171,8 +168,8 @@
                     <button onclick="seedAdditionalRows(25000)" title="Seed 25,000 More Synthetic Rows" class="w-8 h-8 rounded-full bg-[#ece8df] hover:bg-[#e0dbc9] text-neutral-700 flex items-center justify-center text-xs transition border border-[#d6d0c2]">
                         <i class="fa-solid fa-plus"></i>
                     </button>
-                    <button onclick="switchTab('viva')" title="CSE Technical Assessment Guide" class="w-8 h-8 rounded-full bg-[#ece8df] hover:bg-[#e0dbc9] text-neutral-700 flex items-center justify-center text-xs transition border border-[#d6d0c2]">
-                        <i class="fa-solid fa-graduation-cap"></i>
+                    <button onclick="switchTab('catalog')" title="Approved Query Catalog" class="w-8 h-8 rounded-full bg-[#ece8df] hover:bg-[#e0dbc9] text-neutral-700 flex items-center justify-center text-xs transition border border-[#d6d0c2]">
+                        <i class="fa-solid fa-list-check"></i>
                     </button>
                 </div>
             </section>
@@ -263,7 +260,7 @@
                     <!-- Top Row: Card Title & Arrow Button -->
                     <div class="flex items-center justify-between">
                         <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-neutral-700">Optimizer Plan</span>
-                        <button onclick="switchTab('viva')" title="Inspect Viva & Formulas" class="w-8 h-8 rounded-full bg-white/80 hover:bg-white text-neutral-800 flex items-center justify-center text-xs transition shadow-xs">
+                        <button onclick="runAutomatedComparison()" title="Run Automated Comparison" class="w-8 h-8 rounded-full bg-white/80 hover:bg-white text-neutral-800 flex items-center justify-center text-xs transition shadow-xs">
                             <span class="font-mono text-xs font-bold">&nearr;</span>
                         </button>
                     </div>
@@ -321,7 +318,7 @@
                     <pre id="querySqlDisplay" class="p-3.5 text-xs bg-[#141414] text-emerald-400 rounded-2xl overflow-x-auto font-mono terminal-scroll">-- Select a query to view definition</pre>
                 </div>
 
-                <!-- 3-point diagnostic cards -->
+                <!-- 2-point diagnostic cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs pt-1">
                     <div class="p-3.5 rounded-2xl bg-[#faf8f5] border border-[#e7e4dc] space-y-1">
                         <span class="text-[11px] font-bold text-neutral-700">Storage Engine Behavior:</span>
@@ -486,51 +483,9 @@
             </div>
         </section>
 
-        <!-- ================================================================= -->
-        <!-- TAB 6: VIVA VOCE & TECHNICAL REFERENCE -->
-        <!-- ================================================================= -->
-        <section id="tab-viva" class="space-y-6 hidden">
-            <div class="p-6 rounded-[28px] bg-white border border-[#e7e4dc] space-y-5 shadow-sm">
-                <div>
-                    <h2 class="text-base font-bold text-[#141414]">Technical Assessment & Viva Voce Guide</h2>
-                    <p class="text-xs text-neutral-500 mt-0.5">Department of Computer Science & Engineering syllabus reference.</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                    <div class="p-4 rounded-2xl border border-[#e7e4dc] bg-[#faf8f5] space-y-2">
-                        <h4 class="font-bold text-[#141414] text-xs">1. Third Normal Form (3NF) Compliance</h4>
-                        <p class="text-neutral-600 leading-relaxed text-[11px]">
-                            Relations satisfy 1NF (atomic values) and 2NF (surrogate single-column PKs prevent partial functional dependencies). Transitive dependencies are eliminated: `query_name` is stored in `QueryCatalog` rather than repeated across thousands of `BenchmarkResults` records.
-                        </p>
-                    </div>
-
-                    <div class="p-4 rounded-2xl border border-[#e7e4dc] bg-[#faf8f5] space-y-2">
-                        <h4 class="font-bold text-[#141414] text-xs">2. B-Tree Indexing vs Full Table Scan Complexity</h4>
-                        <p class="text-neutral-600 leading-relaxed text-[11px]">
-                            A Full Table Scan requires sequential read of all disk pages (O(N) complexity). An InnoDB B+Tree index structures search keys in balanced nodes of O(log N) complexity, resolving matches via 3 to 4 page reads pointing to clustered primary key leaves.
-                        </p>
-                    </div>
-
-                    <div class="p-4 rounded-2xl border border-[#e7e4dc] bg-[#faf8f5] space-y-2">
-                        <h4 class="font-bold text-[#141414] text-xs">3. Database Trigger Implementation</h4>
-                        <p class="text-neutral-600 leading-relaxed text-[11px]">
-                            Trigger `trg_benchmark_result_audit` executes on `AFTER INSERT` on `BenchmarkResults`. Using pseudorow `NEW`, it captures `result_id` and latency directly in MySQL engine space without application-level overhead.
-                        </p>
-                    </div>
-
-                    <div class="p-4 rounded-2xl border border-[#e7e4dc] bg-[#faf8f5] space-y-2">
-                        <h4 class="font-bold text-[#141414] text-xs">4. Stored Procedure Architecture</h4>
-                        <p class="text-neutral-600 leading-relaxed text-[11px]">
-                            `CALL GetBenchmarkHistory(p_query_id)` executes parameterized multi-table joins on the server, ensuring query plan caching and avoiding repeated network round-trips for reporting.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Footer Notice -->
-        <footer class="pt-2 text-center text-[11px] text-neutral-400 font-medium">
-            Department of Computer Science & Engineering &bull; Sahyadri College of Engineering & Management &bull; Academic Year 2026&ndash;2027
+        <!-- Clean Software Project Footer -->
+        <footer class="pt-4 border-t border-[#e7e4dc] text-center text-[11px] text-neutral-400 font-medium">
+            QueryMetrics &bull; Database Query Performance Analyzer & Optimization System &bull; Open Source Engine
         </footer>
 
     </div>
