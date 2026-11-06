@@ -54,44 +54,152 @@
             background: #d4cfc3;
             border-radius: 4px;
         }
+
+        /* ------------------------------------------------------------- */
+        /* ANIMATION & INTERACTION SYSTEM                                 */
+        /* ------------------------------------------------------------- */
+        
+        /* Smooth Entrance on Tab Switch */
+        @keyframes tabSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .tab-enter {
+            animation: tabSlideUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Pop-In Spring for Badges */
+        @keyframes popSpring {
+            0% { transform: scale(0.7); opacity: 0; }
+            70% { transform: scale(1.08); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .pop-in {
+            animation: popSpring 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* Live Benchmark Glow Pulse */
+        @keyframes activePulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(20, 20, 20, 0.12);
+            }
+            50% {
+                box-shadow: 0 0 0 10px rgba(20, 20, 20, 0);
+            }
+        }
+        .benchmarking-active {
+            animation: activePulse 1.2s infinite ease-in-out;
+        }
+
+        /* Next Part Highlight Flash */
+        @keyframes highlightFlash {
+            0% {
+                box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.3);
+                border-color: #10b981;
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(5, 150, 105, 0);
+                border-color: #e7e4dc;
+            }
+        }
+        .flash-highlight {
+            animation: highlightFlash 1.4s ease-out forwards;
+        }
+
+        /* 3D Perspective Tilt Card */
+        .tilt-card {
+            transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+            transform-style: preserve-3d;
+            will-change: transform;
+        }
+        .tilt-card:hover {
+            box-shadow: 0 18px 30px -10px rgba(0, 0, 0, 0.08), 0 8px 12px -6px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Tactile Button Lift */
+        .btn-lift {
+            transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .btn-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.15);
+        }
+        .btn-lift:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        /* Tactile Arrow Diagonal Shift */
+        .arrow-move {
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .group:hover .arrow-move {
+            transform: translate(3px, -3px);
+        }
+
+        /* Interactive Table Row Nudge */
+        .table-row-hover {
+            transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.18s ease;
+        }
+        .table-row-hover:hover {
+            transform: translateX(4px);
+        }
+
+        /* Radial cursor glow for porcelain canvas */
+        #mainShell::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.45), transparent 40%);
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
     </style>
 </head>
 <body class="min-h-screen bg-[#12151b] p-3 sm:p-6 md:p-8 lg:p-10 antialiased selection:bg-[#141414] selection:text-white flex flex-col justify-between">
 
     <!-- Floating Porcelain Canvas Container (Exact Rounded Shell from Image) -->
-    <div class="bg-[#faf8f5] text-[#141414] rounded-[28px] sm:rounded-[36px] md:rounded-[40px] shadow-2xl border border-neutral-800/20 max-w-[1440px] w-full mx-auto p-6 sm:p-8 md:p-12 space-y-8 relative">
+    <div id="mainShell" class="bg-[#faf8f5] text-[#141414] rounded-[28px] sm:rounded-[36px] md:rounded-[40px] shadow-2xl border border-neutral-800/20 max-w-[1440px] w-full mx-auto p-6 sm:p-8 md:p-12 space-y-8 relative overflow-hidden">
 
         <!-- ================================================================= -->
         <!-- TOP NAVIGATION BAR -->
         <!-- ================================================================= -->
-        <header class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-[#e7e4dc] gap-4">
+        <header class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-[#e7e4dc] gap-4 relative z-10">
             
             <!-- Left: Brand Logo & Title -->
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('lab')">
-                <div class="w-8 h-8 rounded-full bg-[#141414] text-white flex items-center justify-center font-bold text-xs shadow-sm">
+            <div class="flex items-center space-x-3 cursor-pointer group" onclick="switchTab('lab')">
+                <div class="w-8 h-8 rounded-full bg-[#141414] text-white flex items-center justify-center font-bold text-xs shadow-sm group-hover:rotate-180 transition-transform duration-500">
                     <i class="fa-solid fa-circle-half-stroke text-[13px]"></i>
                 </div>
                 <div class="flex items-baseline space-x-2">
-                    <span class="font-extrabold text-lg tracking-tight text-[#141414]">QueryMetrics</span>
+                    <span class="font-extrabold text-lg tracking-tight text-[#141414] group-hover:text-black transition-colors">QueryMetrics</span>
                     <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[#ece8df] text-neutral-600 border border-[#d6d0c2]">v1.0-release</span>
                 </div>
             </div>
 
             <!-- Center & Right: Navigation Tabs -->
             <div class="flex flex-wrap items-center gap-y-2 gap-x-5 sm:gap-x-7 text-xs font-semibold">
-                <button onclick="switchTab('lab')" id="tabBtn-lab" class="tab-link text-[#141414] font-bold border-b-2 border-[#141414] pb-1 transition">
+                <button onclick="switchTab('lab')" id="tabBtn-lab" class="tab-link text-[#141414] font-bold border-b-2 border-[#141414] pb-1 transition-all">
                     Benchmark Lab
                 </button>
-                <button onclick="switchTab('catalog')" id="tabBtn-catalog" class="tab-link text-neutral-500 hover:text-[#141414] font-medium transition">
+                <button onclick="switchTab('catalog')" id="tabBtn-catalog" class="tab-link text-neutral-500 hover:text-[#141414] font-medium transition-all">
                     Query Catalog
                 </button>
-                <button onclick="switchTab('procedure')" id="tabBtn-procedure" class="tab-link text-neutral-500 hover:text-[#141414] font-medium transition">
+                <button onclick="switchTab('procedure')" id="tabBtn-procedure" class="tab-link text-neutral-500 hover:text-[#141414] font-medium transition-all">
                     Stored Procedure
                 </button>
-                <button onclick="switchTab('view')" id="tabBtn-view" class="tab-link text-neutral-500 hover:text-[#141414] font-medium transition">
+                <button onclick="switchTab('view')" id="tabBtn-view" class="tab-link text-neutral-500 hover:text-[#141414] font-medium transition-all">
                     Database View
                 </button>
-                <button onclick="switchTab('audit')" id="tabBtn-audit" class="tab-link text-neutral-500 hover:text-[#141414] font-medium transition">
+                <button onclick="switchTab('audit')" id="tabBtn-audit" class="tab-link text-neutral-500 hover:text-[#141414] font-medium transition-all">
                     Audit Trail
                 </button>
 
@@ -99,7 +207,7 @@
                 <div class="hidden lg:block h-5 w-[1px] bg-[#e7e4dc]"></div>
 
                 <!-- Right Pill: Book a demo / Engine Status Button -->
-                <button onclick="openConfigModal()" class="px-4 py-2 rounded-full border border-[#d6d0c2] bg-[#ece8df] hover:bg-[#e0dbc9] text-xs font-semibold text-[#141414] transition flex items-center space-x-2 shadow-xs">
+                <button onclick="openConfigModal()" class="btn-lift px-4 py-2 rounded-full border border-[#d6d0c2] bg-[#ece8df] hover:bg-[#e0dbc9] text-xs font-semibold text-[#141414] transition flex items-center space-x-2 shadow-xs">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span id="engineStatusText">SQLite Engine</span>
                 </button>
@@ -109,7 +217,7 @@
         <!-- ================================================================= -->
         <!-- TAB 1: BENCHMARK LAB (Hero & 3 Bento Feature Cards from Image) -->
         <!-- ================================================================= -->
-        <main id="tab-lab" class="space-y-8">
+        <main id="tab-lab" class="space-y-8 relative z-10 tab-enter">
 
             <!-- Hero Section (Exact 3-part layout from image) -->
             <section class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pt-2">
@@ -122,9 +230,9 @@
 
                     <!-- Black Pill Button with Arrow (Exact copy of 'Contact sales ↗') -->
                     <div>
-                        <button id="autoCompareBtn" onclick="runAutomatedComparison()" class="px-5 py-2.5 rounded-full bg-[#141414] hover:bg-neutral-800 text-white text-xs font-semibold transition flex items-center space-x-2 shadow-sm">
+                        <button id="autoCompareBtn" onclick="runAutomatedComparison()" class="group btn-lift px-5 py-2.5 rounded-full bg-[#141414] hover:bg-neutral-800 text-white text-xs font-semibold transition flex items-center space-x-2 shadow-sm">
                             <span>Run comparison</span>
-                            <span class="text-sm font-mono">&nearr;</span>
+                            <span class="arrow-move text-sm font-mono">&nearr;</span>
                         </button>
                     </div>
 
@@ -134,20 +242,20 @@
                     <!-- Workload Selection dropdown -->
                     <div class="space-y-1.5 pt-1">
                         <label class="block text-[11px] font-bold uppercase tracking-wider text-neutral-500">Target Workload</label>
-                        <select id="querySelect" onchange="onQuerySelected()" class="w-full px-3 py-2 text-xs rounded-xl border border-[#dedad0] bg-white text-[#141414] outline-none font-medium focus:border-[#141414] transition">
+                        <select id="querySelect" onchange="onQuerySelected()" class="w-full px-3 py-2 text-xs rounded-xl border border-[#dedad0] bg-white text-[#141414] outline-none font-medium focus:border-[#141414] transition hover:border-neutral-400">
                             <option value="">Loading Query Catalog...</option>
                         </select>
                     </div>
 
                     <!-- Single execution trigger -->
                     <div class="flex items-center space-x-2 pt-1">
-                        <input type="text" id="testLabelInput" value="BASELINE_SCAN" class="w-1/2 px-2.5 py-1.5 text-xs rounded-lg border border-[#dedad0] bg-white font-mono text-neutral-700 outline-none">
-                        <select id="repsSelect" class="w-1/4 px-2 py-1.5 text-xs rounded-lg border border-[#dedad0] bg-white font-medium">
+                        <input type="text" id="testLabelInput" value="BASELINE_SCAN" class="w-1/2 px-2.5 py-1.5 text-xs rounded-lg border border-[#dedad0] bg-white font-mono text-neutral-700 outline-none focus:border-[#141414]">
+                        <select id="repsSelect" class="w-1/4 px-2 py-1.5 text-xs rounded-lg border border-[#dedad0] bg-white font-medium focus:border-[#141414]">
                             <option value="1">1x</option>
                             <option value="3" selected>3x</option>
                             <option value="5">5x</option>
                         </select>
-                        <button id="runBtn" onclick="runBenchmark()" title="Execute Single Test" class="w-1/4 py-1.5 px-2 rounded-lg bg-[#ece8df] hover:bg-[#e0dbc9] text-xs font-semibold text-[#141414] border border-[#d6d0c2] transition">
+                        <button id="runBtn" onclick="runBenchmark()" title="Execute Single Test" class="btn-lift w-1/4 py-1.5 px-2 rounded-lg bg-[#ece8df] hover:bg-[#e0dbc9] text-xs font-semibold text-[#141414] border border-[#d6d0c2] transition">
                             <i class="fa-solid fa-play text-[10px]"></i>
                         </button>
                     </div>
@@ -155,20 +263,20 @@
 
                 <!-- Center Large Headline (Col 4-11): Giant Headline matching Image -->
                 <div class="lg:col-span-8 flex flex-col justify-center">
-                    <h1 class="text-3xl sm:text-5xl md:text-6xl lg:text-[64px] font-extrabold text-[#141414] tracking-tight leading-[1.06]">
+                    <h1 class="text-3xl sm:text-5xl md:text-6xl lg:text-[64px] font-extrabold text-[#141414] tracking-tight leading-[1.06] select-none">
                         Easy collection and analysis of query performance data
                     </h1>
                 </div>
 
                 <!-- Right Vertical Icons (Col 12): Floating circular utility buttons -->
                 <div class="hidden lg:flex lg:col-span-1 flex-col items-end space-y-3 pt-2">
-                    <button onclick="openConfigModal()" title="Database Connection Settings" class="w-8 h-8 rounded-full bg-[#ece8df] hover:bg-[#e0dbc9] text-neutral-700 flex items-center justify-center text-xs transition border border-[#d6d0c2]">
+                    <button onclick="openConfigModal()" title="Database Connection Settings" class="btn-lift w-8 h-8 rounded-full bg-[#ece8df] hover:bg-[#e0dbc9] text-neutral-700 flex items-center justify-center text-xs transition border border-[#d6d0c2]">
                         <i class="fa-solid fa-database"></i>
                     </button>
-                    <button onclick="seedAdditionalRows(25000)" title="Seed 25,000 More Synthetic Rows" class="w-8 h-8 rounded-full bg-[#ece8df] hover:bg-[#e0dbc9] text-neutral-700 flex items-center justify-center text-xs transition border border-[#d6d0c2]">
+                    <button onclick="seedAdditionalRows(25000)" title="Seed 25,000 More Synthetic Rows" class="btn-lift w-8 h-8 rounded-full bg-[#ece8df] hover:bg-[#e0dbc9] text-neutral-700 flex items-center justify-center text-xs transition border border-[#d6d0c2]">
                         <i class="fa-solid fa-plus"></i>
                     </button>
-                    <button onclick="switchTab('catalog')" title="Approved Query Catalog" class="w-8 h-8 rounded-full bg-[#ece8df] hover:bg-[#e0dbc9] text-neutral-700 flex items-center justify-center text-xs transition border border-[#d6d0c2]">
+                    <button onclick="switchTab('catalog')" title="Approved Query Catalog" class="btn-lift w-8 h-8 rounded-full bg-[#ece8df] hover:bg-[#e0dbc9] text-neutral-700 flex items-center justify-center text-xs transition border border-[#d6d0c2]">
                         <i class="fa-solid fa-list-check"></i>
                     </button>
                 </div>
@@ -180,12 +288,12 @@
             <section class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
                 
                 <!-- CARD 1 (LEFT): Real-time Latency Chart + Metric Box with Slash -->
-                <div class="flex flex-col justify-between space-y-4">
+                <div class="tilt-card flex flex-col justify-between space-y-4">
                     <!-- Top Visual Box: Latency Chart -->
-                    <div class="bg-white rounded-[26px] p-5 border border-[#e7e4dc] shadow-sm relative overflow-hidden h-[240px] flex flex-col justify-between">
+                    <div id="chartCard" class="bg-white rounded-[26px] p-5 border border-[#e7e4dc] shadow-sm relative overflow-hidden h-[240px] flex flex-col justify-between transition-all duration-300">
                         <div class="flex items-center justify-between">
                             <span class="text-[11px] font-bold uppercase tracking-wider text-neutral-500 font-mono">Query Latency (ms)</span>
-                            <span id="speedupBadge" class="hidden text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                            <span id="speedupBadge" class="hidden text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-xs">
                                 <span id="speedupText">--% Latency Drop</span>
                             </span>
                         </div>
@@ -196,10 +304,10 @@
                     </div>
 
                     <!-- Bottom Box: Exact copy of '804 / medical reports were analyzed this week' -->
-                    <div class="p-5 rounded-[24px] border border-[#dedad0] bg-white flex items-center justify-between shadow-xs">
+                    <div class="p-5 rounded-[24px] border border-[#dedad0] bg-white flex items-center justify-between shadow-xs hover:border-neutral-400 transition-colors">
                         <div class="flex items-baseline space-x-3">
                             <span id="statRecordsCount" class="text-4xl font-extrabold font-mono text-[#141414]">--</span>
-                            <span class="text-3xl text-neutral-300 font-light">/</span>
+                            <span class="text-3xl text-neutral-300 font-light select-none">/</span>
                             <span class="text-xs text-neutral-600 font-medium leading-tight max-w-[150px]">
                                 synthetic records analyzed in DemoRecords
                             </span>
@@ -212,35 +320,35 @@
                 </div>
 
                 <!-- CARD 2 (MIDDLE): Warm Peach/Apricot Pastel Card (Exact match of middle card) -->
-                <div class="bg-[#fae5cb] p-6 rounded-[28px] border border-[#f2d5b5] flex flex-col justify-between relative text-[#2a2016] shadow-sm">
+                <div class="tilt-card group bg-[#fae5cb] p-6 rounded-[28px] border border-[#f2d5b5] flex flex-col justify-between relative text-[#2a2016] shadow-sm hover:border-[#ebbfa0] transition-colors">
                     <!-- Top Row: Card Title & Arrow Button -->
                     <div class="flex items-center justify-between">
                         <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-neutral-700">Storage Switchboard</span>
-                        <button onclick="toggleIndex('idx_demo_records_status')" title="Toggle Primary Status B-Tree" class="w-8 h-8 rounded-full bg-white/80 hover:bg-white text-neutral-800 flex items-center justify-center text-xs transition shadow-xs">
-                            <span class="font-mono text-xs font-bold">&nearr;</span>
+                        <button onclick="toggleIndex('idx_demo_records_status')" title="Toggle Primary Status B-Tree" class="btn-lift w-8 h-8 rounded-full bg-white/80 hover:bg-white text-neutral-800 flex items-center justify-center text-xs transition shadow-xs">
+                            <span class="arrow-move font-mono text-xs font-bold">&nearr;</span>
                         </button>
                     </div>
 
                     <!-- Middle: Index experiment toggles -->
                     <div class="space-y-3 py-4">
                         <!-- Single Column Status Index -->
-                        <div class="p-3.5 rounded-2xl bg-white/70 border border-[#edd1b3] space-y-2">
+                        <div class="p-3.5 rounded-2xl bg-white/75 border border-[#edd1b3] space-y-2 hover:bg-white transition-colors shadow-2xs">
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-mono font-bold text-[#141414]">idx_demo_records_status</span>
-                                <span id="badge-status-idx" class="text-[10px] px-2 py-0.5 rounded-full font-mono font-semibold bg-white text-neutral-600 border border-neutral-300">Checking...</span>
+                                <span id="badge-status-idx" class="text-[10px] px-2 py-0.5 rounded-full font-mono font-semibold bg-white text-neutral-600 border border-neutral-300 transition-all">Checking...</span>
                             </div>
-                            <button id="btn-status-idx" onclick="toggleIndex('idx_demo_records_status')" class="w-full py-1.5 text-xs font-semibold rounded-full bg-white hover:bg-neutral-50 text-neutral-800 border border-[#e0c4a4] transition shadow-xs">
+                            <button id="btn-status-idx" onclick="toggleIndex('idx_demo_records_status')" class="btn-lift w-full py-1.5 text-xs font-semibold rounded-full bg-white hover:bg-neutral-50 text-neutral-800 border border-[#e0c4a4] transition shadow-xs">
                                 Toggle Index
                             </button>
                         </div>
 
                         <!-- Composite Status + Category Index -->
-                        <div class="p-3.5 rounded-2xl bg-white/70 border border-[#edd1b3] space-y-2">
+                        <div class="p-3.5 rounded-2xl bg-white/75 border border-[#edd1b3] space-y-2 hover:bg-white transition-colors shadow-2xs">
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-mono font-bold text-[#141414]">idx_demo_status_category</span>
-                                <span id="badge-composite-idx" class="text-[10px] px-2 py-0.5 rounded-full font-mono font-semibold bg-white text-neutral-600 border border-neutral-300">Checking...</span>
+                                <span id="badge-composite-idx" class="text-[10px] px-2 py-0.5 rounded-full font-mono font-semibold bg-white text-neutral-600 border border-neutral-300 transition-all">Checking...</span>
                             </div>
-                            <button id="btn-composite-idx" onclick="toggleIndex('idx_demo_status_category')" class="w-full py-1.5 text-xs font-semibold rounded-full bg-white hover:bg-neutral-50 text-neutral-800 border border-[#e0c4a4] transition shadow-xs">
+                            <button id="btn-composite-idx" onclick="toggleIndex('idx_demo_status_category')" class="btn-lift w-full py-1.5 text-xs font-semibold rounded-full bg-white hover:bg-neutral-50 text-neutral-800 border border-[#e0c4a4] transition shadow-xs">
                                 Toggle Index
                             </button>
                         </div>
@@ -256,18 +364,18 @@
                 </div>
 
                 <!-- CARD 3 (RIGHT): Soft Mint/Sage Pastel Card (Exact match of right card) -->
-                <div class="bg-[#d8eed2] p-6 rounded-[28px] border border-[#c2e2ba] flex flex-col justify-between relative text-[#162717] shadow-sm">
+                <div class="tilt-card group bg-[#d8eed2] p-6 rounded-[28px] border border-[#c2e2ba] flex flex-col justify-between relative text-[#162717] shadow-sm hover:border-[#b3d9aa] transition-colors">
                     <!-- Top Row: Card Title & Arrow Button -->
                     <div class="flex items-center justify-between">
                         <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-neutral-700">Optimizer Plan</span>
-                        <button onclick="runAutomatedComparison()" title="Run Automated Comparison" class="w-8 h-8 rounded-full bg-white/80 hover:bg-white text-neutral-800 flex items-center justify-center text-xs transition shadow-xs">
-                            <span class="font-mono text-xs font-bold">&nearr;</span>
+                        <button onclick="runAutomatedComparison()" title="Run Automated Comparison" class="btn-lift w-8 h-8 rounded-full bg-white/80 hover:bg-white text-neutral-800 flex items-center justify-center text-xs transition shadow-xs">
+                            <span class="arrow-move font-mono text-xs font-bold">&nearr;</span>
                         </button>
                     </div>
 
                     <!-- Middle: Optimizer Metrics and Complexity Summary -->
                     <div class="space-y-3 py-4">
-                        <div class="p-3.5 rounded-2xl bg-white/70 border border-[#c4e3bc] space-y-1.5">
+                        <div class="p-3.5 rounded-2xl bg-white/75 border border-[#c4e3bc] space-y-1.5 hover:bg-white transition-colors shadow-2xs">
                             <span class="text-[10px] font-mono font-bold uppercase text-neutral-600 block">Baseline vs Indexed</span>
                             <div class="flex items-center justify-between font-mono text-xs">
                                 <span class="text-rose-700 font-bold">ALL Full Scan</span>
@@ -280,7 +388,7 @@
                             </div>
                         </div>
 
-                        <div class="p-3.5 rounded-2xl bg-white/70 border border-[#c4e3bc] space-y-1">
+                        <div class="p-3.5 rounded-2xl bg-white/75 border border-[#c4e3bc] space-y-1 hover:bg-white transition-colors shadow-2xs">
                             <span class="text-[10px] font-mono font-bold uppercase text-neutral-600 block">Speedup Formula</span>
                             <p id="diagFormula" class="text-[11px] font-mono text-neutral-800 leading-tight">
                                 ((T_baseline - T_opt) / T_baseline) * 100
@@ -302,7 +410,7 @@
             <!-- ============================================================= -->
             <!-- EXPANDABLE TECHNICAL WORKBENCH (SQL View, Explanations & Raw Plan) -->
             <!-- ============================================================= -->
-            <section class="p-6 rounded-[28px] border border-[#e7e4dc] bg-white space-y-4 shadow-sm">
+            <section id="workbenchSection" class="tilt-card p-6 rounded-[28px] border border-[#e7e4dc] bg-white space-y-4 shadow-sm transition-all duration-300">
                 <div class="flex items-center justify-between border-b border-[#e7e4dc] pb-3">
                     <div class="flex items-center space-x-2.5">
                         <span class="w-6 h-6 rounded-full bg-[#141414] text-white flex items-center justify-center text-xs font-mono font-bold">
@@ -310,21 +418,21 @@
                         </span>
                         <h2 class="text-sm font-bold text-[#141414]">Storage Engine Behavioral Diagnostics & SQL Execution Plan</h2>
                     </div>
-                    <span id="queryCategoryTag" class="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-[#ece8df] text-neutral-700 border border-[#d6d0c2]">--</span>
+                    <span id="queryCategoryTag" class="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-[#ece8df] text-neutral-700 border border-[#d6d0c2] transition-colors">--</span>
                 </div>
 
                 <!-- SQL Query Display -->
                 <div>
-                    <pre id="querySqlDisplay" class="p-3.5 text-xs bg-[#141414] text-emerald-400 rounded-2xl overflow-x-auto font-mono terminal-scroll">-- Select a query to view definition</pre>
+                    <pre id="querySqlDisplay" class="p-3.5 text-xs bg-[#141414] text-emerald-400 rounded-2xl overflow-x-auto font-mono terminal-scroll shadow-inner">-- Select a query to view definition</pre>
                 </div>
 
                 <!-- 2-point diagnostic cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs pt-1">
-                    <div class="p-3.5 rounded-2xl bg-[#faf8f5] border border-[#e7e4dc] space-y-1">
+                    <div class="p-3.5 rounded-2xl bg-[#faf8f5] border border-[#e7e4dc] space-y-1 hover:border-neutral-400 transition-colors">
                         <span class="text-[11px] font-bold text-neutral-700">Storage Engine Behavior:</span>
                         <p id="queryDescDisplay" class="text-neutral-600 text-[11px] leading-relaxed"></p>
                     </div>
-                    <div class="p-3.5 rounded-2xl bg-[#faf8f5] border border-[#e7e4dc] space-y-1">
+                    <div class="p-3.5 rounded-2xl bg-[#faf8f5] border border-[#e7e4dc] space-y-1 hover:border-neutral-400 transition-colors">
                         <span class="text-[11px] font-bold text-neutral-700">Buffer Pool & Disk I/O Impact:</span>
                         <p id="diagIoImpact" class="text-neutral-600 text-[11px] leading-relaxed">
                             Full Table Scans evict active working sets from the InnoDB buffer pool. B-Tree lookups touch only root-to-leaf pages (~3 page reads), dramatically cutting I/O wait times.
@@ -346,7 +454,7 @@
         <!-- ================================================================= -->
         <!-- TAB 2: QUERY CATALOG -->
         <!-- ================================================================= -->
-        <section id="tab-catalog" class="space-y-4 hidden">
+        <section id="tab-catalog" class="space-y-4 hidden relative z-10">
             <div class="p-6 rounded-[28px] bg-white border border-[#e7e4dc] space-y-4 shadow-sm">
                 <div class="border-b border-[#e7e4dc] pb-3">
                     <h2 class="text-base font-bold text-[#141414]">Approved Query Catalog (`QueryCatalog` Relation)</h2>
@@ -377,7 +485,7 @@
         <!-- ================================================================= -->
         <!-- TAB 3: STORED PROCEDURE (`GetBenchmarkHistory`) -->
         <!-- ================================================================= -->
-        <section id="tab-procedure" class="space-y-4 hidden">
+        <section id="tab-procedure" class="space-y-4 hidden relative z-10">
             <div class="p-6 rounded-[28px] bg-white border border-[#e7e4dc] space-y-4 shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#e7e4dc] pb-3">
                     <div>
@@ -385,8 +493,8 @@
                         <p class="text-xs text-neutral-500 mt-0.5">Encapsulates multi-table relational join across `QueryCatalog`, `BenchmarkRuns`, and `BenchmarkResults` directly on the database engine.</p>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <select id="spQuerySelect" class="px-3 py-1.5 text-xs rounded-full border border-[#dedad0] bg-white text-[#141414] font-medium"></select>
-                        <button onclick="fetchStoredProcedureHistory()" class="px-4 py-1.5 text-xs font-bold rounded-full bg-[#141414] hover:bg-neutral-800 text-white transition shadow-sm">
+                        <select id="spQuerySelect" class="px-3 py-1.5 text-xs rounded-full border border-[#dedad0] bg-white text-[#141414] font-medium outline-none focus:border-[#141414]"></select>
+                        <button onclick="fetchStoredProcedureHistory()" class="btn-lift px-4 py-1.5 text-xs font-bold rounded-full bg-[#141414] hover:bg-neutral-800 text-white transition shadow-sm">
                             Invoke Procedure
                         </button>
                     </div>
@@ -416,14 +524,14 @@
         <!-- ================================================================= -->
         <!-- TAB 4: DATABASE VIEW (`BenchmarkSummary`) -->
         <!-- ================================================================= -->
-        <section id="tab-view" class="space-y-4 hidden">
+        <section id="tab-view" class="space-y-4 hidden relative z-10">
             <div class="p-6 rounded-[28px] bg-white border border-[#e7e4dc] space-y-4 shadow-sm">
                 <div class="flex items-center justify-between border-b border-[#e7e4dc] pb-3">
                     <div>
                         <h2 class="text-base font-bold text-[#141414]">Database View: `SELECT * FROM BenchmarkSummary`</h2>
                         <p class="text-xs text-neutral-500 mt-0.5">Materializes relational abstraction for reporting queries without repeating manual 3-table joins.</p>
                     </div>
-                    <button onclick="fetchSummaryView()" class="px-4 py-1.5 text-xs font-bold rounded-full bg-[#141414] hover:bg-neutral-800 text-white transition shadow-sm">
+                    <button onclick="fetchSummaryView()" class="btn-lift px-4 py-1.5 text-xs font-bold rounded-full bg-[#141414] hover:bg-neutral-800 text-white transition shadow-sm">
                         Refresh View
                     </button>
                 </div>
@@ -452,14 +560,14 @@
         <!-- ================================================================= -->
         <!-- TAB 5: TRIGGER AUDIT TRAIL (`BenchmarkAudit`) -->
         <!-- ================================================================= -->
-        <section id="tab-audit" class="space-y-4 hidden">
+        <section id="tab-audit" class="space-y-4 hidden relative z-10">
             <div class="p-6 rounded-[28px] bg-white border border-[#e7e4dc] space-y-4 shadow-sm">
                 <div class="flex items-center justify-between border-b border-[#e7e4dc] pb-3">
                     <div>
                         <h2 class="text-base font-bold text-[#141414]">Automated Event Log (`trg_benchmark_result_audit`)</h2>
                         <p class="text-xs text-neutral-500 mt-0.5">Fires synchronously AFTER INSERT on `BenchmarkResults` to guarantee audit trail integrity without application-layer overhead.</p>
                     </div>
-                    <button onclick="fetchAuditLogs()" class="px-4 py-1.5 text-xs font-bold rounded-full bg-[#141414] hover:bg-neutral-800 text-white transition shadow-sm">
+                    <button onclick="fetchAuditLogs()" class="btn-lift px-4 py-1.5 text-xs font-bold rounded-full bg-[#141414] hover:bg-neutral-800 text-white transition shadow-sm">
                         Refresh Audit
                     </button>
                 </div>
@@ -484,7 +592,7 @@
         </section>
 
         <!-- Clean Software Project Footer -->
-        <footer class="pt-4 border-t border-[#e7e4dc] text-center text-[11px] text-neutral-400 font-medium">
+        <footer class="pt-4 border-t border-[#e7e4dc] text-center text-[11px] text-neutral-400 font-medium relative z-10">
             QueryMetrics &bull; Database Query Performance Analyzer & Optimization System &bull; Open Source Engine
         </footer>
 
@@ -492,10 +600,10 @@
 
     <!-- Modal: Database Engine Settings -->
     <div id="configModal" class="fixed inset-0 z-50 bg-[#12151b]/70 backdrop-blur-xs hidden flex items-center justify-center p-4">
-        <div class="bg-[#faf8f5] border border-[#d6d0c2] rounded-[32px] max-w-md w-full p-6 shadow-2xl space-y-4">
+        <div class="bg-[#faf8f5] border border-[#d6d0c2] rounded-[32px] max-w-md w-full p-6 shadow-2xl space-y-4 tab-enter">
             <div class="flex items-center justify-between border-b border-[#e7e4dc] pb-3">
                 <h3 class="font-bold text-sm text-[#141414]">Database Engine Configuration</h3>
-                <button onclick="closeConfigModal()" class="w-7 h-7 rounded-full bg-white hover:bg-neutral-100 text-neutral-500 flex items-center justify-center text-xs transition border border-[#d6d0c2]">
+                <button onclick="closeConfigModal()" class="btn-lift w-7 h-7 rounded-full bg-white hover:bg-neutral-100 text-neutral-500 flex items-center justify-center text-xs transition border border-[#d6d0c2]">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
@@ -532,10 +640,10 @@
             </div>
 
             <div class="pt-2 flex items-center space-x-2">
-                <button onclick="testAndSaveMysqlConfig()" class="flex-1 py-2.5 rounded-full bg-[#141414] hover:bg-neutral-800 text-white font-bold text-xs transition shadow-sm">
+                <button onclick="testAndSaveMysqlConfig()" class="btn-lift flex-1 py-2.5 rounded-full bg-[#141414] hover:bg-neutral-800 text-white font-bold text-xs transition shadow-sm">
                     Test & Connect MySQL
                 </button>
-                <button onclick="closeConfigModal()" class="px-5 py-2.5 rounded-full bg-white hover:bg-neutral-100 text-xs text-neutral-700 font-semibold transition border border-[#d6d0c2]">
+                <button onclick="closeConfigModal()" class="btn-lift px-5 py-2.5 rounded-full bg-white hover:bg-neutral-100 text-xs text-neutral-700 font-semibold transition border border-[#d6d0c2]">
                     Cancel
                 </button>
             </div>

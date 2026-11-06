@@ -1,6 +1,6 @@
 /**
  * QueryMetrics — Database Query Performance Analyzer & Optimization System
- * Warm Porcelain & Editorial Minimal Theme Controller & Benchmark Visualizer
+ * Interactive Animation Engine, 3D Tilt Cards, and Micro-Interaction Controller
  */
 
 let catalogData = [];
@@ -35,10 +35,107 @@ document.addEventListener('DOMContentLoaded', () => {
     initChart();
     fetchSystemStatus();
     fetchCatalog();
+    initTiltEffect();
+    initCursorSpotlight();
 });
 
 // -----------------------------------------------------------------------------
-// TAB SWITCHBOARD
+// INTERACTIVE 3D PERSPECTIVE TILT ON MOUSE HOVER
+// -----------------------------------------------------------------------------
+function initTiltEffect() {
+    const cards = document.querySelectorAll('.tilt-card');
+    cards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            // Subtle tilt between -4deg and +4deg
+            const rotateX = ((y - centerY) / centerY) * -4;
+            const rotateY = ((x - centerX) / centerX) * 4;
+            
+            card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-4px)`;
+        });
+
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+        });
+    });
+}
+
+// -----------------------------------------------------------------------------
+// SUBTLE CURSOR SPOTLIGHT TRACKING
+// -----------------------------------------------------------------------------
+function initCursorSpotlight() {
+    const shell = document.getElementById('mainShell');
+    if (!shell) return;
+    shell.addEventListener('mousemove', (e) => {
+        const rect = shell.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        shell.style.setProperty('--mouse-x', `${x}px`);
+        shell.style.setProperty('--mouse-y', `${y}px`);
+    });
+}
+
+// -----------------------------------------------------------------------------
+// SMOOTH NUMBER COUNTER ANIMATION
+// -----------------------------------------------------------------------------
+function animateCounter(elementId, targetValue, duration = 800, isFloat = false, suffix = '') {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+
+    const startValue = parseFloat(el.getAttribute('data-val') || '0') || 0;
+    const startTime = performance.now();
+    el.setAttribute('data-val', targetValue);
+
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // Quartic Out Easing
+        const ease = 1 - Math.pow(1 - progress, 4);
+        const current = startValue + (targetValue - startValue) * ease;
+
+        if (isFloat) {
+            el.innerText = `${current.toFixed(2)}${suffix}`;
+        } else {
+            el.innerText = `${Math.round(current).toLocaleString()}${suffix}`;
+        }
+
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        } else {
+            if (isFloat) {
+                el.innerText = `${targetValue.toFixed(2)}${suffix}`;
+            } else {
+                el.innerText = `${targetValue.toLocaleString()}${suffix}`;
+            }
+        }
+    }
+    requestAnimationFrame(update);
+}
+
+// -----------------------------------------------------------------------------
+// "NEXT PART MOVE" INTERACTION
+// -----------------------------------------------------------------------------
+function highlightNextSection() {
+    const section = document.getElementById('workbenchSection');
+    if (!section) return;
+
+    section.classList.remove('flash-highlight');
+    void section.offsetWidth; // Force DOM reflow
+    section.classList.add('flash-highlight');
+
+    // Smooth scroll down to next part if on smaller viewports
+    if (window.innerWidth < 1024) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
+// -----------------------------------------------------------------------------
+// TAB SWITCHBOARD WITH ENTRANCE ANIMATION
 // -----------------------------------------------------------------------------
 function switchTab(tabId) {
     const tabs = ['lab', 'catalog', 'procedure', 'view', 'audit'];
@@ -48,10 +145,14 @@ function switchTab(tabId) {
         if (el && btn) {
             if (t === tabId) {
                 el.classList.remove('hidden');
-                btn.className = 'tab-link text-[#141414] font-bold border-b-2 border-[#141414] pb-1 transition';
+                el.classList.remove('tab-enter');
+                void el.offsetWidth; // Trigger reflow for animation restart
+                el.classList.add('tab-enter');
+
+                btn.className = 'tab-link text-[#141414] font-bold border-b-2 border-[#141414] pb-1 transition-all';
             } else {
                 el.classList.add('hidden');
-                btn.className = 'tab-link text-neutral-500 hover:text-[#141414] font-medium transition';
+                btn.className = 'tab-link text-neutral-500 hover:text-[#141414] font-medium transition-all';
             }
         }
     });
@@ -69,8 +170,7 @@ async function fetchSystemStatus() {
         const res = await fetch('/api/status');
         const data = await res.json();
         
-        const recCount = document.getElementById('statRecordsCount');
-        if (recCount) recCount.innerText = (data.records_count || 0).toLocaleString();
+        animateCounter('statRecordsCount', data.records_count || 0, 900);
 
         // Engine Status Text
         const text = document.getElementById('engineStatusText');
@@ -91,14 +191,14 @@ async function fetchSystemStatus() {
         if (statusBadge && statusBtn) {
             if (activeIdxNames.includes('idx_demo_records_status')) {
                 statusBadge.innerText = 'ACTIVE (INDEXED)';
-                statusBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-[#141414] text-white';
+                statusBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-[#141414] text-white transition-all';
                 statusBtn.innerText = 'Drop Index';
-                statusBtn.className = 'w-full py-1.5 text-xs font-semibold rounded-full bg-white/80 hover:bg-white text-neutral-800 transition shadow-xs';
+                statusBtn.className = 'btn-lift w-full py-1.5 text-xs font-semibold rounded-full bg-white/80 hover:bg-white text-neutral-800 transition shadow-xs';
             } else {
                 statusBadge.innerText = 'DISABLED (FULL SCAN)';
-                statusBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-mono font-medium bg-black/10 text-neutral-700';
+                statusBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-mono font-medium bg-black/10 text-neutral-700 transition-all';
                 statusBtn.innerText = 'Create Index';
-                statusBtn.className = 'w-full py-1.5 text-xs font-bold rounded-full bg-[#141414] hover:bg-neutral-800 text-white transition shadow-sm';
+                statusBtn.className = 'btn-lift w-full py-1.5 text-xs font-bold rounded-full bg-[#141414] hover:bg-neutral-800 text-white transition shadow-sm';
             }
         }
 
@@ -108,14 +208,14 @@ async function fetchSystemStatus() {
         if (compBadge && compBtn) {
             if (activeIdxNames.includes('idx_demo_status_category')) {
                 compBadge.innerText = 'ACTIVE (INDEXED)';
-                compBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-[#141414] text-white';
+                compBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-[#141414] text-white transition-all';
                 compBtn.innerText = 'Drop Index';
-                compBtn.className = 'w-full py-1.5 text-xs font-semibold rounded-full bg-white/80 hover:bg-white text-neutral-800 transition shadow-xs';
+                compBtn.className = 'btn-lift w-full py-1.5 text-xs font-semibold rounded-full bg-white/80 hover:bg-white text-neutral-800 transition shadow-xs';
             } else {
                 compBadge.innerText = 'DISABLED (FULL SCAN)';
-                compBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-mono font-medium bg-black/10 text-neutral-700';
+                compBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-mono font-medium bg-black/10 text-neutral-700 transition-all';
                 compBtn.innerText = 'Create Index';
-                compBtn.className = 'w-full py-1.5 text-xs font-bold rounded-full bg-[#141414] hover:bg-neutral-800 text-white transition shadow-sm';
+                compBtn.className = 'btn-lift w-full py-1.5 text-xs font-bold rounded-full bg-[#141414] hover:bg-neutral-800 text-white transition shadow-sm';
             }
         }
 
@@ -159,7 +259,7 @@ async function fetchCatalog() {
 
             if (tableBody) {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-[#f4efe4]/60 transition border-b border-[#e7e4dc]";
+                tr.className = "table-row-hover hover:bg-[#f4efe4]/60 transition border-b border-[#e7e4dc]";
                 tr.innerHTML = `
                     <td class="py-3 px-3 font-mono font-bold text-neutral-500">#${q.query_id}</td>
                     <td class="py-3 px-3 font-bold text-[#141414]">
@@ -169,7 +269,7 @@ async function fetchCatalog() {
                     <td class="py-3 px-3 font-mono text-neutral-700 max-w-xs truncate">${q.query_sql}</td>
                     <td class="py-3 px-3 text-neutral-600 font-sans text-xs">${q.description}</td>
                     <td class="py-3 px-3 text-right">
-                        <button onclick="selectAndBenchmark(${q.query_id})" class="px-3.5 py-1 text-xs font-bold rounded-full bg-[#141414] hover:bg-neutral-800 text-white transition shadow-xs">
+                        <button onclick="selectAndBenchmark(${q.query_id})" class="btn-lift px-3.5 py-1 text-xs font-bold rounded-full bg-[#141414] hover:bg-neutral-800 text-white transition shadow-xs">
                             Select
                         </button>
                     </td>
@@ -192,6 +292,9 @@ function onQuerySelected() {
         const meta = WORKLOAD_DESCRIPTIONS[qid] || { category: "GENERAL", explanation: item.description };
         document.getElementById('queryCategoryTag').innerText = meta.category;
         document.getElementById('queryDescDisplay').innerText = meta.explanation;
+        
+        // Gentle pulse on workbench to signal update
+        highlightNextSection();
     }
 }
 
@@ -202,15 +305,19 @@ function selectAndBenchmark(queryId) {
 }
 
 // -----------------------------------------------------------------------------
-// 1-CLICK AUTOMATED COMPARISON (Core Lab Demo)
+// 1-CLICK AUTOMATED COMPARISON (Core Lab Demo with Cool Moves)
 // -----------------------------------------------------------------------------
 async function runAutomatedComparison() {
     const queryId = document.getElementById('querySelect').value;
     const btn = document.getElementById('autoCompareBtn');
+    const chartCard = document.getElementById('chartCard');
     if (!queryId) return;
 
     btn.disabled = true;
     btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i><span>Comparing...</span>`;
+    
+    // Add glowing pulse to chart card during run
+    if (chartCard) chartCard.classList.add('benchmarking-active');
 
     try {
         const res = await fetch('/api/benchmark/compare', {
@@ -231,20 +338,24 @@ async function runAutomatedComparison() {
         lastBaseline = { ms: b.elapsed_ms };
         lastOptimized = { ms: o.elapsed_ms };
 
-        const optTimeEl = document.getElementById('optimizedTime');
+        // Animated counting for latency
+        animateCounter('optimizedTime', o.elapsed_ms, 700, true, ' ms');
+
         const optMethodEl = document.getElementById('optimizedMethod');
-        if (optTimeEl) optTimeEl.innerText = `${o.elapsed_ms.toFixed(2)} ms`;
         if (optMethodEl) optMethodEl.innerText = `ref (B-Tree)`;
 
-        // Speedup Badge
+        // Speedup Badge with Pop-in Animation
         const badge = document.getElementById('speedupBadge');
         const text = document.getElementById('speedupText');
         if (badge && text) {
             badge.classList.remove('hidden');
+            badge.classList.remove('pop-in');
+            void badge.offsetWidth; // Reflow
+            badge.classList.add('pop-in');
             text.innerText = `${exp.speedup_pct}% Latency Drop`;
         }
 
-        // Update Chart
+        // Update Chart with smooth spring animation
         updateChart();
 
         // Update Explanation
@@ -260,14 +371,18 @@ async function runAutomatedComparison() {
             expOutput.innerText = `=== OPTIMIZED EXECUTION PLAN (EXPLAIN ANALYZE) ===\n${planText}\n\n=== BASELINE EXECUTION PLAN (ALL FULL SCAN) ===\n${b.plan?.explain_analyze || JSON.stringify(b.plan, null, 2)}`;
         }
 
+        // Trigger smooth move / highlight on next part
+        highlightNextSection();
+
         await fetchSystemStatus();
 
     } catch (err) {
         console.error('Comparison failed:', err);
         alert('Comparative benchmark failed.');
     } finally {
+        if (chartCard) chartCard.classList.remove('benchmarking-active');
         btn.disabled = false;
-        btn.innerHTML = `<span>Run comparison</span><span class="text-sm font-mono">&nearr;</span>`;
+        btn.innerHTML = `<span>Run comparison</span><span class="arrow-move text-sm font-mono">&nearr;</span>`;
     }
 }
 
@@ -279,11 +394,13 @@ async function runBenchmark() {
     const testLabel = document.getElementById('testLabelInput').value.trim() || 'SINGLE_RUN';
     const reps = parseInt(document.getElementById('repsSelect').value) || 1;
     const runBtn = document.getElementById('runBtn');
+    const chartCard = document.getElementById('chartCard');
 
     if (!queryId) return;
 
     runBtn.disabled = true;
     runBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-[10px]"></i>`;
+    if (chartCard) chartCard.classList.add('benchmarking-active');
 
     try {
         const res = await fetch('/api/benchmark', {
@@ -318,9 +435,8 @@ async function runBenchmark() {
             document.getElementById('testLabelInput').value = 'OPTIMIZED_INDEX';
         } else {
             lastOptimized = { ms: avgMs, scanType: scanType, rows: rows, label: testLabel };
-            const optTimeEl = document.getElementById('optimizedTime');
+            animateCounter('optimizedTime', avgMs, 600, true, ' ms');
             const optMethodEl = document.getElementById('optimizedMethod');
-            if (optTimeEl) optTimeEl.innerText = `${avgMs.toFixed(2)} ms`;
             if (optMethodEl) optMethodEl.innerText = scanType;
             document.getElementById('testLabelInput').value = 'BASELINE_SCAN';
         }
@@ -334,6 +450,9 @@ async function runBenchmark() {
                 const text = document.getElementById('speedupText');
                 if (badge && text) {
                     badge.classList.remove('hidden');
+                    badge.classList.remove('pop-in');
+                    void badge.offsetWidth;
+                    badge.classList.add('pop-in');
                     text.innerText = `${pct}% Latency Drop`;
                 }
                 const diagForm = document.getElementById('diagFormula');
@@ -352,11 +471,13 @@ async function runBenchmark() {
             }
         }
 
+        highlightNextSection();
         await fetchSystemStatus();
 
     } catch (err) {
         console.error('Execution failed:', err);
     } finally {
+        if (chartCard) chartCard.classList.remove('benchmarking-active');
         runBtn.disabled = false;
         runBtn.innerHTML = `<i class="fa-solid fa-play text-[10px]"></i>`;
     }
@@ -385,13 +506,14 @@ async function toggleIndex(indexName) {
             return;
         }
         await fetchSystemStatus();
+        highlightNextSection();
     } catch (err) {
         console.error('Failed to toggle index:', err);
     }
 }
 
 // -----------------------------------------------------------------------------
-// MINIMAL EDITORIAL PALETTE CHART.JS CONTROLLER
+// MINIMAL EDITORIAL PALETTE CHART.JS CONTROLLER (WITH DYNAMIC SPRING ANIMATIONS)
 // -----------------------------------------------------------------------------
 function initChart() {
     const canvas = document.getElementById('comparisonChart');
@@ -420,6 +542,10 @@ function initChart() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            animation: {
+                duration: 800,
+                easing: 'easeOutQuart'
+            },
             scales: {
                 y: {
                     beginAtZero: true,
@@ -479,7 +605,7 @@ async function fetchStoredProcedureHistory() {
 
         rows.forEach(r => {
             const tr = document.createElement('tr');
-            tr.className = "hover:bg-[#f4efe4]/60 font-mono text-[11px] transition border-b border-[#e7e4dc]";
+            tr.className = "table-row-hover hover:bg-[#f4efe4]/60 font-mono text-[11px] transition border-b border-[#e7e4dc]";
             tr.innerHTML = `
                 <td class="py-3 px-3 font-bold text-neutral-500">#${r.result_id}</td>
                 <td class="py-3 px-3 text-neutral-600">Run #${r.run_id}</td>
@@ -516,7 +642,7 @@ async function fetchSummaryView() {
 
         rows.forEach(r => {
             const tr = document.createElement('tr');
-            tr.className = "hover:bg-[#f4efe4]/60 font-mono text-[11px] transition border-b border-[#e7e4dc]";
+            tr.className = "table-row-hover hover:bg-[#f4efe4]/60 font-mono text-[11px] transition border-b border-[#e7e4dc]";
             tr.innerHTML = `
                 <td class="py-3 px-3 font-bold text-neutral-500">#${r.result_id}</td>
                 <td class="py-3 px-3 text-[#141414] font-sans font-semibold">${r.query_name}</td>
@@ -553,7 +679,7 @@ async function fetchAuditLogs() {
 
         rows.forEach(r => {
             const tr = document.createElement('tr');
-            tr.className = "hover:bg-[#f4efe4]/60 font-mono text-[11px] transition border-b border-[#e7e4dc]";
+            tr.className = "table-row-hover hover:bg-[#f4efe4]/60 font-mono text-[11px] transition border-b border-[#e7e4dc]";
             tr.innerHTML = `
                 <td class="py-3 px-3 font-bold text-neutral-500">#${r.audit_id}</td>
                 <td class="py-3 px-3 text-neutral-600">Result #${r.result_id}</td>
