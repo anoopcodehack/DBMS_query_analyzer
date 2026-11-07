@@ -4,477 +4,371 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QueryMetrics — Database Query Performance Analyzer & Optimization System</title>
-    <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        canvas: '#faf8f5',
-                        charcoal: '#141414',
-                        cardPeach: '#fae5cb',
-                        cardMint: '#d8eed2',
-                        hairline: '#e7e4dc',
-                        pillBg: '#ece8df',
+                        surface: '#ffffff',
+                        subtle: '#f8f9fa',
+                        border: '#e5e7eb',
+                        muted: '#6b7280',
+                        heading: '#111827',
+                        accent: '#2563eb',
+                        accentHover: '#1d4ed8',
                     },
                     fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-                        mono: ['"Geist Mono"', '"JetBrains Mono"', 'monospace'],
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', '"Fira Code"', 'Consolas', 'monospace'],
                     }
                 }
             }
         }
     </script>
-    <!-- Google Fonts: Plus Jakarta Sans & Geist Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #12151b;
-            color: #141414;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #f8f9fa;
+            color: #111827;
         }
         code, pre, .font-mono {
-            font-family: 'Geist Mono', monospace;
-        }
-        .terminal-scroll::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
-        }
-        .terminal-scroll::-webkit-scrollbar-track {
-            background: #faf8f5;
-        }
-        .terminal-scroll::-webkit-scrollbar-thumb {
-            background: #d4cfc3;
-            border-radius: 4px;
+            font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
         }
 
-        /* ------------------------------------------------------------- */
-        /* ANIMATION & INTERACTION SYSTEM                                 */
-        /* ------------------------------------------------------------- */
-        
-        /* Smooth Entrance on Tab Switch */
-        @keyframes tabSlideUp {
-            from {
-                opacity: 0;
-                transform: translateY(14px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .tab-enter {
-            animation: tabSlideUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
+        /* Scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
 
-        /* Pop-In Spring for Badges */
-        @keyframes popSpring {
-            0% { transform: scale(0.7); opacity: 0; }
-            70% { transform: scale(1.08); opacity: 1; }
+        /* Tab enter animation */
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tab-enter { animation: fadeSlideIn 0.3s ease-out forwards; }
+
+        /* Pulse for active benchmark */
+        @keyframes subtlePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.15); }
+            50% { box-shadow: 0 0 0 6px rgba(37, 99, 235, 0); }
+        }
+        .benchmarking-active { animation: subtlePulse 1.2s infinite ease-in-out; }
+
+        /* Pop-in for badges */
+        @keyframes popIn {
+            0% { transform: scale(0.85); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
-        .pop-in {
-            animation: popSpring 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
+        .pop-in { animation: popIn 0.3s ease-out forwards; }
 
-        /* Live Benchmark Glow Pulse */
-        @keyframes activePulse {
-            0%, 100% {
-                box-shadow: 0 0 0 0 rgba(20, 20, 20, 0.12);
-            }
-            50% {
-                box-shadow: 0 0 0 10px rgba(20, 20, 20, 0);
-            }
+        /* Flash highlight for workbench */
+        @keyframes flashBorder {
+            0% { box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
         }
-        .benchmarking-active {
-            animation: activePulse 1.2s infinite ease-in-out;
-        }
+        .flash-highlight { animation: flashBorder 1s ease-out forwards; }
 
-        /* Next Part Highlight Flash */
-        @keyframes highlightFlash {
-            0% {
-                box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.3);
-                border-color: #10b981;
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(5, 150, 105, 0);
-                border-color: #e7e4dc;
-            }
-        }
-        .flash-highlight {
-            animation: highlightFlash 1.4s ease-out forwards;
-        }
+        /* Table row hover */
+        .table-row-hover { transition: background-color 0.15s ease; }
+        .table-row-hover:hover { background-color: #f3f4f6; }
 
-        /* 3D Perspective Tilt Card */
-        .tilt-card {
-            transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-            transform-style: preserve-3d;
-            will-change: transform;
+        /* Button styles */
+        .btn-primary {
+            background-color: #2563eb;
+            color: #ffffff;
+            transition: background-color 0.15s ease, box-shadow 0.15s ease;
         }
-        .tilt-card:hover {
-            box-shadow: 0 18px 30px -10px rgba(0, 0, 0, 0.08), 0 8px 12px -6px rgba(0, 0, 0, 0.04);
-        }
+        .btn-primary:hover { background-color: #1d4ed8; }
+        .btn-primary:active { background-color: #1e40af; }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        /* Tactile Button Lift */
-        .btn-lift {
-            transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+        .btn-secondary {
+            background-color: #ffffff;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+            transition: background-color 0.15s ease, border-color 0.15s ease;
         }
-        .btn-lift:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.15);
-        }
-        .btn-lift:active {
-            transform: translateY(1px) scale(0.98);
-        }
+        .btn-secondary:hover { background-color: #f9fafb; border-color: #d1d5db; }
+        .btn-secondary:active { background-color: #f3f4f6; }
 
-        /* Tactile Arrow Diagonal Shift */
-        .arrow-move {
-            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        /* Active tab indicator */
+        .tab-active {
+            color: #111827;
+            font-weight: 600;
+            border-bottom: 2px solid #2563eb;
         }
-        .group:hover .arrow-move {
-            transform: translate(3px, -3px);
+        .tab-inactive {
+            color: #6b7280;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
         }
+        .tab-inactive:hover { color: #374151; }
 
-        /* Interactive Table Row Nudge */
-        .table-row-hover {
-            transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.18s ease;
-        }
-        .table-row-hover:hover {
-            transform: translateX(4px);
-        }
-
-        /* Radial cursor glow for porcelain canvas */
-        #mainShell::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: inherit;
-            background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.45), transparent 40%);
-            pointer-events: none;
-            z-index: 1;
-            opacity: 0.8;
-            transition: opacity 0.3s ease;
-        }
+        /* Toggle switch */
+        .idx-active { background-color: #dcfce7; color: #166534; border-color: #bbf7d0; }
+        .idx-inactive { background-color: #f3f4f6; color: #6b7280; border-color: #e5e7eb; }
     </style>
 </head>
-<body class="min-h-screen bg-[#12151b] p-3 sm:p-6 md:p-8 lg:p-10 antialiased selection:bg-[#141414] selection:text-white flex flex-col justify-between">
+<body class="min-h-screen antialiased">
 
-    <!-- Floating Porcelain Canvas Container (Exact Rounded Shell from Image) -->
-    <div id="mainShell" class="bg-[#faf8f5] text-[#141414] rounded-[28px] sm:rounded-[36px] md:rounded-[40px] shadow-2xl border border-neutral-800/20 max-w-[1440px] w-full mx-auto p-6 sm:p-8 md:p-12 space-y-8 relative overflow-hidden">
+    <!-- ============================================================= -->
+    <!-- TOP NAVBAR                                                     -->
+    <!-- ============================================================= -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-14">
 
-        <!-- ================================================================= -->
-        <!-- TOP NAVIGATION BAR -->
-        <!-- ================================================================= -->
-        <header class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-[#e7e4dc] gap-4 relative z-10">
-            
-            <!-- Left: Brand Logo & Title -->
-            <div class="flex items-center space-x-3 cursor-pointer group" onclick="switchTab('lab')">
-                <div class="w-8 h-8 rounded-full bg-[#141414] text-white flex items-center justify-center font-bold text-xs shadow-sm group-hover:rotate-180 transition-transform duration-500">
-                    <i class="fa-solid fa-circle-half-stroke text-[13px]"></i>
-                </div>
-                <div class="flex items-baseline space-x-2">
-                    <span class="font-extrabold text-lg tracking-tight text-[#141414] group-hover:text-black transition-colors">QueryMetrics</span>
-                    <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[#ece8df] text-neutral-600 border border-[#d6d0c2]">v1.0-release</span>
-                </div>
-            </div>
-
-            <!-- Center & Right: Navigation Tabs -->
-            <div class="flex flex-wrap items-center gap-y-2 gap-x-5 sm:gap-x-7 text-xs font-semibold">
-                <button onclick="switchTab('lab')" id="tabBtn-lab" class="tab-link text-[#141414] font-bold border-b-2 border-[#141414] pb-1 transition-all">
-                    Benchmark Lab
-                </button>
-                <button onclick="switchTab('catalog')" id="tabBtn-catalog" class="tab-link text-neutral-500 hover:text-[#141414] font-medium transition-all">
-                    Query Catalog
-                </button>
-                <button onclick="switchTab('procedure')" id="tabBtn-procedure" class="tab-link text-neutral-500 hover:text-[#141414] font-medium transition-all">
-                    Stored Procedure
-                </button>
-                <button onclick="switchTab('view')" id="tabBtn-view" class="tab-link text-neutral-500 hover:text-[#141414] font-medium transition-all">
-                    Database View
-                </button>
-                <button onclick="switchTab('audit')" id="tabBtn-audit" class="tab-link text-neutral-500 hover:text-[#141414] font-medium transition-all">
-                    Audit Trail
-                </button>
-
-                <!-- Thin Vertical Divider -->
-                <div class="hidden lg:block h-5 w-[1px] bg-[#e7e4dc]"></div>
-
-                <!-- Right Pill: Book a demo / Engine Status Button -->
-                <button onclick="openConfigModal()" class="btn-lift px-4 py-2 rounded-full border border-[#d6d0c2] bg-[#ece8df] hover:bg-[#e0dbc9] text-xs font-semibold text-[#141414] transition flex items-center space-x-2 shadow-xs">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span id="engineStatusText">SQLite Engine</span>
-                </button>
-            </div>
-        </header>
-
-        <!-- ================================================================= -->
-        <!-- TAB 1: BENCHMARK LAB (Hero & 3 Bento Feature Cards from Image) -->
-        <!-- ================================================================= -->
-        <main id="tab-lab" class="space-y-8 relative z-10 tab-enter">
-
-            <!-- Hero Section (Exact 3-part layout from image) -->
-            <section class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pt-2">
-                
-                <!-- Left Sub-column (Col 1-3): Intro text, Black pill button, Hairline divider, Dropdown -->
-                <div class="lg:col-span-3 space-y-4">
-                    <p class="text-xs text-neutral-600 leading-relaxed font-medium">
-                        Introducing our query benchmark platform designed specifically for database administrators, backend architects, and software engineers alike!
-                    </p>
-
-                    <!-- Black Pill Button with Arrow (Exact copy of 'Contact sales ↗') -->
-                    <div>
-                        <button id="autoCompareBtn" onclick="runAutomatedComparison()" class="group btn-lift px-5 py-2.5 rounded-full bg-[#141414] hover:bg-neutral-800 text-white text-xs font-semibold transition flex items-center space-x-2 shadow-sm">
-                            <span>Run comparison</span>
-                            <span class="arrow-move text-sm font-mono">&nearr;</span>
-                        </button>
+                <!-- Left: Logo -->
+                <div class="flex items-center space-x-3 cursor-pointer select-none" onclick="switchTab('lab')">
+                    <div class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
+                        Q
                     </div>
+                    <span class="text-sm font-bold text-gray-900 tracking-tight">QueryMetrics</span>
+                    <span class="hidden sm:inline-block text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 border border-gray-200">v1.0</span>
+                </div>
 
-                    <!-- Hairline Divider -->
-                    <div class="border-b border-[#e7e4dc] pt-2"></div>
+                <!-- Center: Tabs -->
+                <div class="hidden md:flex items-center space-x-1">
+                    <button onclick="switchTab('lab')" id="tabBtn-lab" class="tab-link tab-active px-3 py-4 text-sm transition-colors">
+                        Benchmark Lab
+                    </button>
+                    <button onclick="switchTab('catalog')" id="tabBtn-catalog" class="tab-link tab-inactive px-3 py-4 text-sm transition-colors">
+                        Query Catalog
+                    </button>
+                    <button onclick="switchTab('procedure')" id="tabBtn-procedure" class="tab-link tab-inactive px-3 py-4 text-sm transition-colors">
+                        Stored Procedure
+                    </button>
+                    <button onclick="switchTab('view')" id="tabBtn-view" class="tab-link tab-inactive px-3 py-4 text-sm transition-colors">
+                        Database View
+                    </button>
+                    <button onclick="switchTab('audit')" id="tabBtn-audit" class="tab-link tab-inactive px-3 py-4 text-sm transition-colors">
+                        Audit Trail
+                    </button>
+                </div>
 
-                    <!-- Workload Selection dropdown -->
-                    <div class="space-y-1.5 pt-1">
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-neutral-500">Target Workload</label>
-                        <select id="querySelect" onchange="onQuerySelected()" class="w-full px-3 py-2 text-xs rounded-xl border border-[#dedad0] bg-white text-[#141414] outline-none font-medium focus:border-[#141414] transition hover:border-neutral-400">
+                <!-- Right: Status + Config -->
+                <div class="flex items-center space-x-3">
+                    <button onclick="openConfigModal()" class="btn-secondary flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span id="engineStatusText">SQLite Engine</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Tab Bar -->
+        <div class="md:hidden border-t border-gray-100 overflow-x-auto">
+            <div class="flex px-4 space-x-1">
+                <button onclick="switchTab('lab')" id="tabBtn-lab-m" class="tab-link-m whitespace-nowrap px-3 py-2.5 text-xs font-semibold text-blue-600 border-b-2 border-blue-600">Lab</button>
+                <button onclick="switchTab('catalog')" id="tabBtn-catalog-m" class="tab-link-m whitespace-nowrap px-3 py-2.5 text-xs font-medium text-gray-500 border-b-2 border-transparent">Catalog</button>
+                <button onclick="switchTab('procedure')" id="tabBtn-procedure-m" class="tab-link-m whitespace-nowrap px-3 py-2.5 text-xs font-medium text-gray-500 border-b-2 border-transparent">Procedure</button>
+                <button onclick="switchTab('view')" id="tabBtn-view-m" class="tab-link-m whitespace-nowrap px-3 py-2.5 text-xs font-medium text-gray-500 border-b-2 border-transparent">View</button>
+                <button onclick="switchTab('audit')" id="tabBtn-audit-m" class="tab-link-m whitespace-nowrap px-3 py-2.5 text-xs font-medium text-gray-500 border-b-2 border-transparent">Audit</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ============================================================= -->
+    <!-- MAIN CONTENT AREA                                              -->
+    <!-- ============================================================= -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- ========================================================= -->
+        <!-- TAB 1: BENCHMARK LAB                                       -->
+        <!-- ========================================================= -->
+        <main id="tab-lab" class="space-y-6 tab-enter">
+
+            <!-- Top Controls Row -->
+            <div class="bg-white rounded-xl border border-gray-200 p-5">
+                <div class="flex flex-col lg:flex-row lg:items-end gap-4">
+
+                    <!-- Query Selector -->
+                    <div class="flex-1 min-w-0">
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Target Workload</label>
+                        <select id="querySelect" onchange="onQuerySelected()" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
                             <option value="">Loading Query Catalog...</option>
                         </select>
                     </div>
 
-                    <!-- Single execution trigger -->
-                    <div class="flex items-center space-x-2 pt-1">
-                        <input type="text" id="testLabelInput" value="BASELINE_SCAN" class="w-1/2 px-2.5 py-1.5 text-xs rounded-lg border border-[#dedad0] bg-white font-mono text-neutral-700 outline-none focus:border-[#141414]">
-                        <select id="repsSelect" class="w-1/4 px-2 py-1.5 text-xs rounded-lg border border-[#dedad0] bg-white font-medium focus:border-[#141414]">
+                    <!-- Test Label -->
+                    <div class="w-full lg:w-44">
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Test Label</label>
+                        <input type="text" id="testLabelInput" value="BASELINE_SCAN" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 bg-white font-mono text-gray-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
+                    </div>
+
+                    <!-- Repetitions -->
+                    <div class="w-full lg:w-24">
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Reps</label>
+                        <select id="repsSelect" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
                             <option value="1">1x</option>
                             <option value="3" selected>3x</option>
                             <option value="5">5x</option>
                         </select>
-                        <button id="runBtn" onclick="runBenchmark()" title="Execute Single Test" class="btn-lift w-1/4 py-1.5 px-2 rounded-lg bg-[#ece8df] hover:bg-[#e0dbc9] text-xs font-semibold text-[#141414] border border-[#d6d0c2] transition">
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex items-end space-x-2">
+                        <button id="runBtn" onclick="runBenchmark()" class="btn-secondary px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2">
                             <i class="fa-solid fa-play text-[10px]"></i>
+                            <span>Run</span>
+                        </button>
+                        <button id="autoCompareBtn" onclick="runAutomatedComparison()" class="btn-primary px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2">
+                            <i class="fa-solid fa-arrows-left-right text-xs"></i>
+                            <span>Compare</span>
+                        </button>
+                        <button onclick="seedAdditionalRows(25000)" title="Seed 25,000 rows" class="btn-secondary px-3 py-2 rounded-lg text-sm">
+                            <i class="fa-solid fa-plus text-xs"></i>
                         </button>
                     </div>
                 </div>
+            </div>
 
-                <!-- Center Large Headline (Col 4-11): Giant Headline matching Image -->
-                <div class="lg:col-span-8 flex flex-col justify-center">
-                    <h1 class="text-3xl sm:text-5xl md:text-6xl lg:text-[64px] font-extrabold text-[#141414] tracking-tight leading-[1.06] select-none">
-                        Easy collection and analysis of query performance data
-                    </h1>
-                </div>
+            <!-- Results Grid: Chart + Stats + Indexes -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                <!-- Right Vertical Icons (Col 12): Floating circular utility buttons -->
-                <div class="hidden lg:flex lg:col-span-1 flex-col items-end space-y-3 pt-2">
-                    <button onclick="openConfigModal()" title="Database Connection Settings" class="btn-lift w-8 h-8 rounded-full bg-[#ece8df] hover:bg-[#e0dbc9] text-neutral-700 flex items-center justify-center text-xs transition border border-[#d6d0c2]">
-                        <i class="fa-solid fa-database"></i>
-                    </button>
-                    <button onclick="seedAdditionalRows(25000)" title="Seed 25,000 More Synthetic Rows" class="btn-lift w-8 h-8 rounded-full bg-[#ece8df] hover:bg-[#e0dbc9] text-neutral-700 flex items-center justify-center text-xs transition border border-[#d6d0c2]">
-                        <i class="fa-solid fa-plus"></i>
-                    </button>
-                    <button onclick="switchTab('catalog')" title="Approved Query Catalog" class="btn-lift w-8 h-8 rounded-full bg-[#ece8df] hover:bg-[#e0dbc9] text-neutral-700 flex items-center justify-center text-xs transition border border-[#d6d0c2]">
-                        <i class="fa-solid fa-list-check"></i>
-                    </button>
-                </div>
-            </section>
-
-            <!-- ============================================================= -->
-            <!-- 3 BENTO / FEATURE CARDS (Exact match to the 3 cards in the image) -->
-            <!-- ============================================================= -->
-            <section class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-                
-                <!-- CARD 1 (LEFT): Real-time Latency Chart + Metric Box with Slash -->
-                <div class="tilt-card flex flex-col justify-between space-y-4">
-                    <!-- Top Visual Box: Latency Chart -->
-                    <div id="chartCard" class="bg-white rounded-[26px] p-5 border border-[#e7e4dc] shadow-sm relative overflow-hidden h-[240px] flex flex-col justify-between transition-all duration-300">
-                        <div class="flex items-center justify-between">
-                            <span class="text-[11px] font-bold uppercase tracking-wider text-neutral-500 font-mono">Query Latency (ms)</span>
-                            <span id="speedupBadge" class="hidden text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-xs">
-                                <span id="speedupText">--% Latency Drop</span>
-                            </span>
+                <!-- Chart Panel -->
+                <div class="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-900">Query Latency Comparison</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Baseline vs Indexed execution time (ms)</p>
                         </div>
-                        
-                        <div class="h-40 relative w-full">
-                            <canvas id="comparisonChart"></canvas>
-                        </div>
+                        <span id="speedupBadge" class="hidden text-xs font-mono font-semibold px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <span id="speedupText">--% Latency Drop</span>
+                        </span>
                     </div>
-
-                    <!-- Bottom Box: Exact copy of '804 / medical reports were analyzed this week' -->
-                    <div class="p-5 rounded-[24px] border border-[#dedad0] bg-white flex items-center justify-between shadow-xs hover:border-neutral-400 transition-colors">
-                        <div class="flex items-baseline space-x-3">
-                            <span id="statRecordsCount" class="text-4xl font-extrabold font-mono text-[#141414]">--</span>
-                            <span class="text-3xl text-neutral-300 font-light select-none">/</span>
-                            <span class="text-xs text-neutral-600 font-medium leading-tight max-w-[150px]">
-                                synthetic records analyzed in DemoRecords
-                            </span>
+                    <div id="chartCard" class="h-56 relative transition-all duration-300">
+                        <canvas id="comparisonChart"></canvas>
+                    </div>
+                    <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-baseline space-x-2">
+                                <span id="statRecordsCount" class="text-2xl font-bold font-mono text-gray-900">--</span>
+                                <span class="text-xs text-gray-500">records in DemoRecords</span>
+                            </div>
                         </div>
                         <div class="text-right">
-                            <span id="optimizedTime" class="text-lg font-mono font-bold text-emerald-700 block">-- ms</span>
-                            <span id="optimizedMethod" class="text-[10px] font-mono text-neutral-500">indexed</span>
+                            <span id="optimizedTime" class="text-lg font-mono font-bold text-emerald-600">-- ms</span>
+                            <span id="optimizedMethod" class="block text-[10px] font-mono text-gray-400 mt-0.5">indexed</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- CARD 2 (MIDDLE): Warm Peach/Apricot Pastel Card (Exact match of middle card) -->
-                <div class="tilt-card group bg-[#fae5cb] p-6 rounded-[28px] border border-[#f2d5b5] flex flex-col justify-between relative text-[#2a2016] shadow-sm hover:border-[#ebbfa0] transition-colors">
-                    <!-- Top Row: Card Title & Arrow Button -->
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-neutral-700">Storage Switchboard</span>
-                        <button onclick="toggleIndex('idx_demo_records_status')" title="Toggle Primary Status B-Tree" class="btn-lift w-8 h-8 rounded-full bg-white/80 hover:bg-white text-neutral-800 flex items-center justify-center text-xs transition shadow-xs">
-                            <span class="arrow-move font-mono text-xs font-bold">&nearr;</span>
-                        </button>
-                    </div>
+                <!-- Sidebar: Index Toggles + Optimizer Info -->
+                <div class="space-y-4">
 
-                    <!-- Middle: Index experiment toggles -->
-                    <div class="space-y-3 py-4">
-                        <!-- Single Column Status Index -->
-                        <div class="p-3.5 rounded-2xl bg-white/75 border border-[#edd1b3] space-y-2 hover:bg-white transition-colors shadow-2xs">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-mono font-bold text-[#141414]">idx_demo_records_status</span>
-                                <span id="badge-status-idx" class="text-[10px] px-2 py-0.5 rounded-full font-mono font-semibold bg-white text-neutral-600 border border-neutral-300 transition-all">Checking...</span>
+                    <!-- Index Controls -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-5">
+                        <h3 class="text-sm font-semibold text-gray-900 mb-4">Index Controls</h3>
+
+                        <!-- Status Index -->
+                        <div class="space-y-3">
+                            <div class="p-3 rounded-lg border border-gray-200 bg-gray-50">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs font-mono font-semibold text-gray-700 truncate">idx_demo_records_status</span>
+                                    <span id="badge-status-idx" class="text-[10px] px-2 py-0.5 rounded font-mono font-semibold idx-inactive border">Checking...</span>
+                                </div>
+                                <button id="btn-status-idx" onclick="toggleIndex('idx_demo_records_status')" class="w-full py-1.5 text-xs font-semibold rounded-lg btn-secondary">
+                                    Toggle Index
+                                </button>
                             </div>
-                            <button id="btn-status-idx" onclick="toggleIndex('idx_demo_records_status')" class="btn-lift w-full py-1.5 text-xs font-semibold rounded-full bg-white hover:bg-neutral-50 text-neutral-800 border border-[#e0c4a4] transition shadow-xs">
-                                Toggle Index
-                            </button>
-                        </div>
 
-                        <!-- Composite Status + Category Index -->
-                        <div class="p-3.5 rounded-2xl bg-white/75 border border-[#edd1b3] space-y-2 hover:bg-white transition-colors shadow-2xs">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-mono font-bold text-[#141414]">idx_demo_status_category</span>
-                                <span id="badge-composite-idx" class="text-[10px] px-2 py-0.5 rounded-full font-mono font-semibold bg-white text-neutral-600 border border-neutral-300 transition-all">Checking...</span>
-                            </div>
-                            <button id="btn-composite-idx" onclick="toggleIndex('idx_demo_status_category')" class="btn-lift w-full py-1.5 text-xs font-semibold rounded-full bg-white hover:bg-neutral-50 text-neutral-800 border border-[#e0c4a4] transition shadow-xs">
-                                Toggle Index
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Bottom Text (Matches 'For veterinarians') -->
-                    <div class="pt-2">
-                        <h3 class="text-lg font-bold text-[#1b140d]">For storage engines</h3>
-                        <p class="text-xs text-[#544436] leading-relaxed mt-1">
-                            Our platform simplifies the benchmark process and provides valuable insights into B-Tree leaf traversal vs unindexed O(N) page reads.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- CARD 3 (RIGHT): Soft Mint/Sage Pastel Card (Exact match of right card) -->
-                <div class="tilt-card group bg-[#d8eed2] p-6 rounded-[28px] border border-[#c2e2ba] flex flex-col justify-between relative text-[#162717] shadow-sm hover:border-[#b3d9aa] transition-colors">
-                    <!-- Top Row: Card Title & Arrow Button -->
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-neutral-700">Optimizer Plan</span>
-                        <button onclick="runAutomatedComparison()" title="Run Automated Comparison" class="btn-lift w-8 h-8 rounded-full bg-white/80 hover:bg-white text-neutral-800 flex items-center justify-center text-xs transition shadow-xs">
-                            <span class="arrow-move font-mono text-xs font-bold">&nearr;</span>
-                        </button>
-                    </div>
-
-                    <!-- Middle: Optimizer Metrics and Complexity Summary -->
-                    <div class="space-y-3 py-4">
-                        <div class="p-3.5 rounded-2xl bg-white/75 border border-[#c4e3bc] space-y-1.5 hover:bg-white transition-colors shadow-2xs">
-                            <span class="text-[10px] font-mono font-bold uppercase text-neutral-600 block">Baseline vs Indexed</span>
-                            <div class="flex items-center justify-between font-mono text-xs">
-                                <span class="text-rose-700 font-bold">ALL Full Scan</span>
-                                <span class="text-neutral-400">&rarr;</span>
-                                <span class="text-emerald-800 font-bold">ref Index Scan</span>
-                            </div>
-                            <div class="text-[11px] font-mono text-neutral-600 pt-1 flex justify-between">
-                                <span>Complexity:</span>
-                                <span class="font-bold text-neutral-800">O(N) &rarr; O(log N)</span>
+                            <!-- Composite Index -->
+                            <div class="p-3 rounded-lg border border-gray-200 bg-gray-50">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs font-mono font-semibold text-gray-700 truncate">idx_demo_status_category</span>
+                                    <span id="badge-composite-idx" class="text-[10px] px-2 py-0.5 rounded font-mono font-semibold idx-inactive border">Checking...</span>
+                                </div>
+                                <button id="btn-composite-idx" onclick="toggleIndex('idx_demo_status_category')" class="w-full py-1.5 text-xs font-semibold rounded-lg btn-secondary">
+                                    Toggle Index
+                                </button>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="p-3.5 rounded-2xl bg-white/75 border border-[#c4e3bc] space-y-1 hover:bg-white transition-colors shadow-2xs">
-                            <span class="text-[10px] font-mono font-bold uppercase text-neutral-600 block">Speedup Formula</span>
-                            <p id="diagFormula" class="text-[11px] font-mono text-neutral-800 leading-tight">
-                                ((T_baseline - T_opt) / T_baseline) * 100
-                            </p>
+                    <!-- Optimizer Summary -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-5">
+                        <h3 class="text-sm font-semibold text-gray-900 mb-3">Optimizer Summary</h3>
+                        <div class="space-y-3 text-xs">
+                            <div class="flex items-center justify-between font-mono">
+                                <span class="text-rose-600 font-semibold">ALL Full Scan</span>
+                                <span class="text-gray-400">-></span>
+                                <span class="text-emerald-600 font-semibold">ref Index Scan</span>
+                            </div>
+                            <div class="flex items-center justify-between font-mono text-gray-600">
+                                <span>Complexity</span>
+                                <span class="font-semibold text-gray-800">O(N) -> O(log N)</span>
+                            </div>
+                            <div class="pt-2 border-t border-gray-100">
+                                <span class="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Speedup Formula</span>
+                                <p id="diagFormula" class="text-xs font-mono text-gray-700 mt-1">((T_baseline - T_opt) / T_baseline) * 100</p>
+                            </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Bottom Text (Matches 'For analysts') -->
-                    <div class="pt-2">
-                        <h3 class="text-lg font-bold text-[#112112]">For query optimizers</h3>
-                        <p class="text-xs text-[#38523a] leading-relaxed mt-1">
-                            Join us in transforming SQL query performance with automated EXPLAIN ANALYZE iterator tree decomposition and buffer pool diagnostics.
-                        </p>
-                    </div>
+            <!-- Workbench: SQL + Diagnostics + Execution Plan -->
+            <div id="workbenchSection" class="bg-white rounded-xl border border-gray-200 p-5 space-y-4 transition-all duration-300">
+                <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+                    <h3 class="text-sm font-semibold text-gray-900">SQL Execution Details</h3>
+                    <span id="queryCategoryTag" class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">--</span>
                 </div>
 
-            </section>
+                <!-- SQL Display -->
+                <pre id="querySqlDisplay" class="p-4 text-xs bg-gray-900 text-emerald-400 rounded-lg overflow-x-auto font-mono custom-scroll leading-relaxed">-- Select a query to view definition</pre>
 
-            <!-- ============================================================= -->
-            <!-- EXPANDABLE TECHNICAL WORKBENCH (SQL View, Explanations & Raw Plan) -->
-            <!-- ============================================================= -->
-            <section id="workbenchSection" class="tilt-card p-6 rounded-[28px] border border-[#e7e4dc] bg-white space-y-4 shadow-sm transition-all duration-300">
-                <div class="flex items-center justify-between border-b border-[#e7e4dc] pb-3">
-                    <div class="flex items-center space-x-2.5">
-                        <span class="w-6 h-6 rounded-full bg-[#141414] text-white flex items-center justify-center text-xs font-mono font-bold">
-                            <i class="fa-solid fa-code text-[10px]"></i>
-                        </span>
-                        <h2 class="text-sm font-bold text-[#141414]">Storage Engine Behavioral Diagnostics & SQL Execution Plan</h2>
+                <!-- Diagnostic Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-4 rounded-lg bg-gray-50 border border-gray-200">
+                        <h4 class="text-xs font-semibold text-gray-700 mb-1">Storage Engine Behavior</h4>
+                        <p id="queryDescDisplay" class="text-xs text-gray-600 leading-relaxed"></p>
                     </div>
-                    <span id="queryCategoryTag" class="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-[#ece8df] text-neutral-700 border border-[#d6d0c2] transition-colors">--</span>
-                </div>
-
-                <!-- SQL Query Display -->
-                <div>
-                    <pre id="querySqlDisplay" class="p-3.5 text-xs bg-[#141414] text-emerald-400 rounded-2xl overflow-x-auto font-mono terminal-scroll shadow-inner">-- Select a query to view definition</pre>
-                </div>
-
-                <!-- 2-point diagnostic cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs pt-1">
-                    <div class="p-3.5 rounded-2xl bg-[#faf8f5] border border-[#e7e4dc] space-y-1 hover:border-neutral-400 transition-colors">
-                        <span class="text-[11px] font-bold text-neutral-700">Storage Engine Behavior:</span>
-                        <p id="queryDescDisplay" class="text-neutral-600 text-[11px] leading-relaxed"></p>
-                    </div>
-                    <div class="p-3.5 rounded-2xl bg-[#faf8f5] border border-[#e7e4dc] space-y-1 hover:border-neutral-400 transition-colors">
-                        <span class="text-[11px] font-bold text-neutral-700">Buffer Pool & Disk I/O Impact:</span>
-                        <p id="diagIoImpact" class="text-neutral-600 text-[11px] leading-relaxed">
+                    <div class="p-4 rounded-lg bg-gray-50 border border-gray-200">
+                        <h4 class="text-xs font-semibold text-gray-700 mb-1">Buffer Pool & Disk I/O Impact</h4>
+                        <p id="diagIoImpact" class="text-xs text-gray-600 leading-relaxed">
                             Full Table Scans evict active working sets from the InnoDB buffer pool. B-Tree lookups touch only root-to-leaf pages (~3 page reads), dramatically cutting I/O wait times.
                         </p>
                     </div>
                 </div>
 
-                <!-- Raw Execution Plan Output -->
-                <div class="pt-1">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-[11px] font-bold uppercase tracking-wider text-neutral-500 font-mono">Raw Execution Plan (EXPLAIN ANALYZE)</span>
-                    </div>
-                    <pre id="explainOutput" class="p-3.5 rounded-2xl bg-[#faf8f5] text-neutral-800 text-xs font-mono overflow-x-auto border border-[#e7e4dc] max-h-40 terminal-scroll leading-relaxed">Select a query and click 'Run comparison' to inspect execution plans.</pre>
+                <!-- Execution Plan -->
+                <div>
+                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Raw Execution Plan (EXPLAIN ANALYZE)</h4>
+                    <pre id="explainOutput" class="p-4 rounded-lg bg-gray-50 text-gray-800 text-xs font-mono overflow-x-auto border border-gray-200 max-h-44 custom-scroll leading-relaxed">Select a query and click 'Compare' to inspect execution plans.</pre>
                 </div>
-            </section>
+            </div>
 
         </main>
 
-        <!-- ================================================================= -->
-        <!-- TAB 2: QUERY CATALOG -->
-        <!-- ================================================================= -->
-        <section id="tab-catalog" class="space-y-4 hidden relative z-10">
-            <div class="p-6 rounded-[28px] bg-white border border-[#e7e4dc] space-y-4 shadow-sm">
-                <div class="border-b border-[#e7e4dc] pb-3">
-                    <h2 class="text-base font-bold text-[#141414]">Approved Query Catalog (`QueryCatalog` Relation)</h2>
-                    <p class="text-xs text-neutral-500 mt-0.5">
-                        Curated benchmark workloads approved for performance testing. To ensure database safety, arbitrary DDL/DML input is rejected.
-                    </p>
+        <!-- ========================================================= -->
+        <!-- TAB 2: QUERY CATALOG                                       -->
+        <!-- ========================================================= -->
+        <section id="tab-catalog" class="hidden">
+            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-200">
+                    <h2 class="text-sm font-semibold text-gray-900">Approved Query Catalog</h2>
+                    <p class="text-xs text-gray-500 mt-0.5">Curated benchmark workloads approved for performance testing.</p>
                 </div>
-
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs border-collapse">
+                    <table class="w-full text-left text-sm">
                         <thead>
-                            <tr class="border-b border-[#e7e4dc] text-neutral-600 uppercase font-semibold font-mono text-[10px] bg-[#faf8f5]">
-                                <th class="py-3 px-3">ID</th>
-                                <th class="py-3 px-3">Query Name</th>
-                                <th class="py-3 px-3">SQL Statement</th>
-                                <th class="py-3 px-3">Behavioral Purpose</th>
-                                <th class="py-3 px-3 text-right">Action</th>
+                            <tr class="border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50">
+                                <th class="py-3 px-5">ID</th>
+                                <th class="py-3 px-5">Query Name</th>
+                                <th class="py-3 px-5">SQL Statement</th>
+                                <th class="py-3 px-5">Purpose</th>
+                                <th class="py-3 px-5 text-right">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="catalogTableBody" class="divide-y divide-[#f0ede6] text-[11px]">
+                        <tbody id="catalogTableBody" class="divide-y divide-gray-100 text-xs">
                             <!-- Injected by JS -->
                         </tbody>
                     </table>
@@ -482,74 +376,72 @@
             </div>
         </section>
 
-        <!-- ================================================================= -->
-        <!-- TAB 3: STORED PROCEDURE (`GetBenchmarkHistory`) -->
-        <!-- ================================================================= -->
-        <section id="tab-procedure" class="space-y-4 hidden relative z-10">
-            <div class="p-6 rounded-[28px] bg-white border border-[#e7e4dc] space-y-4 shadow-sm">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#e7e4dc] pb-3">
+        <!-- ========================================================= -->
+        <!-- TAB 3: STORED PROCEDURE                                    -->
+        <!-- ========================================================= -->
+        <section id="tab-procedure" class="hidden">
+            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
-                        <h2 class="text-base font-bold text-[#141414]">Stored Procedure: `CALL GetBenchmarkHistory(p_query_id)`</h2>
-                        <p class="text-xs text-neutral-500 mt-0.5">Encapsulates multi-table relational join across `QueryCatalog`, `BenchmarkRuns`, and `BenchmarkResults` directly on the database engine.</p>
+                        <h2 class="text-sm font-semibold text-gray-900">Stored Procedure: CALL GetBenchmarkHistory(p_query_id)</h2>
+                        <p class="text-xs text-gray-500 mt-0.5">Multi-table relational join across QueryCatalog, BenchmarkRuns, and BenchmarkResults.</p>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <select id="spQuerySelect" class="px-3 py-1.5 text-xs rounded-full border border-[#dedad0] bg-white text-[#141414] font-medium outline-none focus:border-[#141414]"></select>
-                        <button onclick="fetchStoredProcedureHistory()" class="btn-lift px-4 py-1.5 text-xs font-bold rounded-full bg-[#141414] hover:bg-neutral-800 text-white transition shadow-sm">
+                        <select id="spQuerySelect" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 bg-white text-gray-900 font-medium outline-none focus:border-blue-500 transition"></select>
+                        <button onclick="fetchStoredProcedureHistory()" class="btn-primary px-4 py-1.5 text-xs font-semibold rounded-lg">
                             Invoke Procedure
                         </button>
                     </div>
                 </div>
-
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs border-collapse">
+                    <table class="w-full text-left text-sm">
                         <thead>
-                            <tr class="border-b border-[#e7e4dc] text-neutral-600 uppercase font-semibold font-mono text-[10px] bg-[#faf8f5]">
-                                <th class="py-3 px-3">Result ID</th>
-                                <th class="py-3 px-3">Run ID</th>
-                                <th class="py-3 px-3">Workload Name</th>
-                                <th class="py-3 px-3">Test Label</th>
-                                <th class="py-3 px-3">Latency (ms)</th>
-                                <th class="py-3 px-3">Returned Rows</th>
-                                <th class="py-3 px-3">Recorded At</th>
+                            <tr class="border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50">
+                                <th class="py-3 px-5">Result ID</th>
+                                <th class="py-3 px-5">Run ID</th>
+                                <th class="py-3 px-5">Workload Name</th>
+                                <th class="py-3 px-5">Test Label</th>
+                                <th class="py-3 px-5">Latency (ms)</th>
+                                <th class="py-3 px-5">Returned Rows</th>
+                                <th class="py-3 px-5">Recorded At</th>
                             </tr>
                         </thead>
-                        <tbody id="spTableBody" class="divide-y divide-[#f0ede6] text-[11px]">
-                            <tr><td colspan="7" class="py-4 text-center text-neutral-400 font-mono">Click 'Invoke Procedure' to query history.</td></tr>
+                        <tbody id="spTableBody" class="divide-y divide-gray-100 text-xs">
+                            <tr><td colspan="7" class="py-6 text-center text-gray-400 font-mono text-xs">Click 'Invoke Procedure' to query history.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- ================================================================= -->
-        <!-- TAB 4: DATABASE VIEW (`BenchmarkSummary`) -->
-        <!-- ================================================================= -->
-        <section id="tab-view" class="space-y-4 hidden relative z-10">
-            <div class="p-6 rounded-[28px] bg-white border border-[#e7e4dc] space-y-4 shadow-sm">
-                <div class="flex items-center justify-between border-b border-[#e7e4dc] pb-3">
+        <!-- ========================================================= -->
+        <!-- TAB 4: DATABASE VIEW                                       -->
+        <!-- ========================================================= -->
+        <section id="tab-view" class="hidden">
+            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
                     <div>
-                        <h2 class="text-base font-bold text-[#141414]">Database View: `SELECT * FROM BenchmarkSummary`</h2>
-                        <p class="text-xs text-neutral-500 mt-0.5">Materializes relational abstraction for reporting queries without repeating manual 3-table joins.</p>
+                        <h2 class="text-sm font-semibold text-gray-900">Database View: BenchmarkSummary</h2>
+                        <p class="text-xs text-gray-500 mt-0.5">Relational abstraction for reporting without manual multi-table joins.</p>
                     </div>
-                    <button onclick="fetchSummaryView()" class="btn-lift px-4 py-1.5 text-xs font-bold rounded-full bg-[#141414] hover:bg-neutral-800 text-white transition shadow-sm">
+                    <button onclick="fetchSummaryView()" class="btn-primary px-4 py-1.5 text-xs font-semibold rounded-lg">
                         Refresh View
                     </button>
                 </div>
-
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs border-collapse">
+                    <table class="w-full text-left text-sm">
                         <thead>
-                            <tr class="border-b border-[#e7e4dc] text-neutral-600 uppercase font-semibold font-mono text-[10px] bg-[#faf8f5]">
-                                <th class="py-3 px-3">Result ID</th>
-                                <th class="py-3 px-3">Workload Name</th>
-                                <th class="py-3 px-3">Status</th>
-                                <th class="py-3 px-3">Test Label</th>
-                                <th class="py-3 px-3">Latency (ms)</th>
-                                <th class="py-3 px-3">Returned Rows</th>
-                                <th class="py-3 px-3">Recorded At</th>
+                            <tr class="border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50">
+                                <th class="py-3 px-5">Result ID</th>
+                                <th class="py-3 px-5">Workload Name</th>
+                                <th class="py-3 px-5">Status</th>
+                                <th class="py-3 px-5">Test Label</th>
+                                <th class="py-3 px-5">Latency (ms)</th>
+                                <th class="py-3 px-5">Returned Rows</th>
+                                <th class="py-3 px-5">Recorded At</th>
                             </tr>
                         </thead>
-                        <tbody id="viewTableBody" class="divide-y divide-[#f0ede6] text-[11px]">
+                        <tbody id="viewTableBody" class="divide-y divide-gray-100 text-xs">
                             <!-- Injected by JS -->
                         </tbody>
                     </table>
@@ -557,33 +449,32 @@
             </div>
         </section>
 
-        <!-- ================================================================= -->
-        <!-- TAB 5: TRIGGER AUDIT TRAIL (`BenchmarkAudit`) -->
-        <!-- ================================================================= -->
-        <section id="tab-audit" class="space-y-4 hidden relative z-10">
-            <div class="p-6 rounded-[28px] bg-white border border-[#e7e4dc] space-y-4 shadow-sm">
-                <div class="flex items-center justify-between border-b border-[#e7e4dc] pb-3">
+        <!-- ========================================================= -->
+        <!-- TAB 5: AUDIT TRAIL                                         -->
+        <!-- ========================================================= -->
+        <section id="tab-audit" class="hidden">
+            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
                     <div>
-                        <h2 class="text-base font-bold text-[#141414]">Automated Event Log (`trg_benchmark_result_audit`)</h2>
-                        <p class="text-xs text-neutral-500 mt-0.5">Fires synchronously AFTER INSERT on `BenchmarkResults` to guarantee audit trail integrity without application-layer overhead.</p>
+                        <h2 class="text-sm font-semibold text-gray-900">Trigger Audit Trail: trg_benchmark_result_audit</h2>
+                        <p class="text-xs text-gray-500 mt-0.5">Fires AFTER INSERT on BenchmarkResults to guarantee audit integrity.</p>
                     </div>
-                    <button onclick="fetchAuditLogs()" class="btn-lift px-4 py-1.5 text-xs font-bold rounded-full bg-[#141414] hover:bg-neutral-800 text-white transition shadow-sm">
+                    <button onclick="fetchAuditLogs()" class="btn-primary px-4 py-1.5 text-xs font-semibold rounded-lg">
                         Refresh Audit
                     </button>
                 </div>
-
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs border-collapse">
+                    <table class="w-full text-left text-sm">
                         <thead>
-                            <tr class="border-b border-[#e7e4dc] text-neutral-600 uppercase font-semibold font-mono text-[10px] bg-[#faf8f5]">
-                                <th class="py-3 px-3">Audit ID</th>
-                                <th class="py-3 px-3">Result ID</th>
-                                <th class="py-3 px-3">Event Type</th>
-                                <th class="py-3 px-3">Timestamp</th>
-                                <th class="py-3 px-3">Audit Details</th>
+                            <tr class="border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50">
+                                <th class="py-3 px-5">Audit ID</th>
+                                <th class="py-3 px-5">Result ID</th>
+                                <th class="py-3 px-5">Event Type</th>
+                                <th class="py-3 px-5">Timestamp</th>
+                                <th class="py-3 px-5">Audit Details</th>
                             </tr>
                         </thead>
-                        <tbody id="auditTableBody" class="divide-y divide-[#f0ede6] text-[11px] font-mono">
+                        <tbody id="auditTableBody" class="divide-y divide-gray-100 text-xs font-mono">
                             <!-- Injected by JS -->
                         </tbody>
                     </table>
@@ -591,59 +482,60 @@
             </div>
         </section>
 
-        <!-- Clean Software Project Footer -->
-        <footer class="pt-4 border-t border-[#e7e4dc] text-center text-[11px] text-neutral-400 font-medium relative z-10">
+        <!-- Footer -->
+        <footer class="text-center text-xs text-gray-400 py-4">
             QueryMetrics &bull; Database Query Performance Analyzer & Optimization System &bull; Open Source Engine
         </footer>
-
     </div>
 
-    <!-- Modal: Database Engine Settings -->
-    <div id="configModal" class="fixed inset-0 z-50 bg-[#12151b]/70 backdrop-blur-xs hidden flex items-center justify-center p-4">
-        <div class="bg-[#faf8f5] border border-[#d6d0c2] rounded-[32px] max-w-md w-full p-6 shadow-2xl space-y-4 tab-enter">
-            <div class="flex items-center justify-between border-b border-[#e7e4dc] pb-3">
-                <h3 class="font-bold text-sm text-[#141414]">Database Engine Configuration</h3>
-                <button onclick="closeConfigModal()" class="btn-lift w-7 h-7 rounded-full bg-white hover:bg-neutral-100 text-neutral-500 flex items-center justify-center text-xs transition border border-[#d6d0c2]">
+    <!-- ============================================================= -->
+    <!-- MODAL: Database Engine Configuration                           -->
+    <!-- ============================================================= -->
+    <div id="configModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl space-y-4 tab-enter border border-gray-200">
+            <div class="flex items-center justify-between pb-3 border-b border-gray-200">
+                <h3 class="font-semibold text-sm text-gray-900">Database Engine Configuration</h3>
+                <button onclick="closeConfigModal()" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 flex items-center justify-center text-xs transition">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
-            <p class="text-xs text-neutral-600 leading-relaxed">
-                Connect directly to your local MySQL 8.0 instance or continue using the zero-config embedded SQLite engine.
+            <p class="text-xs text-gray-500 leading-relaxed">
+                Connect to your MySQL 8.0 instance or continue with the embedded SQLite engine.
             </p>
 
             <div class="space-y-3 text-xs">
                 <div>
-                    <label class="block font-semibold text-neutral-700 mb-1">Host</label>
-                    <input type="text" id="cfgHost" value="localhost" class="w-full px-3 py-2 rounded-xl border border-[#dedad0] bg-white text-[#141414] font-mono outline-none focus:border-[#141414]">
+                    <label class="block font-medium text-gray-700 mb-1">Host</label>
+                    <input type="text" id="cfgHost" value="localhost" class="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-sm">
                 </div>
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-neutral-700 mb-1">Port</label>
-                        <input type="number" id="cfgPort" value="3306" class="w-full px-3 py-2 rounded-xl border border-[#dedad0] bg-white text-[#141414] font-mono outline-none focus:border-[#141414]">
+                        <label class="block font-medium text-gray-700 mb-1">Port</label>
+                        <input type="number" id="cfgPort" value="3306" class="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-sm">
                     </div>
                     <div>
-                        <label class="block font-semibold text-neutral-700 mb-1">Database</label>
-                        <input type="text" id="cfgDb" value="query_performance_analyzer" class="w-full px-3 py-2 rounded-xl border border-[#dedad0] bg-white text-[#141414] font-mono outline-none focus:border-[#141414]">
+                        <label class="block font-medium text-gray-700 mb-1">Database</label>
+                        <input type="text" id="cfgDb" value="query_performance_analyzer" class="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-sm">
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-neutral-700 mb-1">Username</label>
-                        <input type="text" id="cfgUser" value="root" class="w-full px-3 py-2 rounded-xl border border-[#dedad0] bg-white text-[#141414] font-mono outline-none focus:border-[#141414]">
+                        <label class="block font-medium text-gray-700 mb-1">Username</label>
+                        <input type="text" id="cfgUser" value="root" class="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-sm">
                     </div>
                     <div>
-                        <label class="block font-semibold text-neutral-700 mb-1">Password</label>
-                        <input type="password" id="cfgPass" placeholder="Leave empty if none" class="w-full px-3 py-2 rounded-xl border border-[#dedad0] bg-white text-[#141414] font-mono outline-none focus:border-[#141414]">
+                        <label class="block font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" id="cfgPass" placeholder="Leave empty if none" class="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-sm">
                     </div>
                 </div>
             </div>
 
-            <div class="pt-2 flex items-center space-x-2">
-                <button onclick="testAndSaveMysqlConfig()" class="btn-lift flex-1 py-2.5 rounded-full bg-[#141414] hover:bg-neutral-800 text-white font-bold text-xs transition shadow-sm">
+            <div class="pt-2 flex items-center space-x-3">
+                <button onclick="testAndSaveMysqlConfig()" class="btn-primary flex-1 py-2.5 rounded-lg font-semibold text-xs">
                     Test & Connect MySQL
                 </button>
-                <button onclick="closeConfigModal()" class="btn-lift px-5 py-2.5 rounded-full bg-white hover:bg-neutral-100 text-xs text-neutral-700 font-semibold transition border border-[#d6d0c2]">
+                <button onclick="closeConfigModal()" class="btn-secondary px-5 py-2.5 rounded-lg text-xs font-medium">
                     Cancel
                 </button>
             </div>
@@ -651,7 +543,6 @@
         </div>
     </div>
 
-    <!-- Client-side script -->
     <script src="/static/js/dashboard.js"></script>
 </body>
 </html>
